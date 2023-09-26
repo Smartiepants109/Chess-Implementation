@@ -3,8 +3,8 @@ package chessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
-public class myBoard implements chess.ChessBoard {
-    public myBoard() {
+public class ChessBoardImp implements chess.ChessBoard {
+    public ChessBoardImp() {
         resetBoard();
     }
 

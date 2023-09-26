@@ -3,7 +3,7 @@ package chessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
-public class myMove implements chess.ChessMove{
+public class ChessMoveImp implements chess.ChessMove{
     @Override
     public ChessPosition getStartPosition() {
         return null;

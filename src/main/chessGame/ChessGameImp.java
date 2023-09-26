@@ -7,7 +7,7 @@ import chess.InvalidMoveException;
 
 import java.util.Collection;
 
-public class myGame implements chess.ChessGame{
+public class ChessGameImp implements chess.ChessGame{
     @Override
     public TeamColor getTeamTurn() {
         return null;
