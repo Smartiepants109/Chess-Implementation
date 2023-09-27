@@ -3,23 +3,29 @@ package chessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
-public class ChessMoveImp implements chess.ChessMove{
+public class ChessMoveImp implements chess.ChessMove {
+    ChessPositionImp start;
+    ChessPositionImp end;
+    ChessPiece.PieceType promoPiece;
+
     public ChessMoveImp(ChessPosition startPosition, ChessPosition endPosition, ChessPiece.PieceType promotionPiece) {
-        //FIXME YOU IDIOT
+        start = new ChessPositionImp(startPosition.getRow(), startPosition.getColumn());
+        end = new ChessPositionImp(endPosition.getRow(), endPosition.getColumn());
+        promoPiece = promotionPiece;
     }
 
     @Override
     public ChessPosition getStartPosition() {
-        return null;
+        return start;
     }
 
     @Override
     public ChessPosition getEndPosition() {
-        return null;
+        return end;
     }
 
     @Override
     public ChessPiece.PieceType getPromotionPiece() {
-        return null;
+        return promoPiece;
     }
 }
