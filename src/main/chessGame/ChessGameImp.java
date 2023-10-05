@@ -2,11 +2,10 @@ package chessGame;
 
 import chess.*;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ChessGameImp implements chess.ChessGame {
+
     TeamColor currentTurn;
     ChessBoard board;
     Map<ChessBoard, Integer> pastMoves;
@@ -27,6 +26,11 @@ public class ChessGameImp implements chess.ChessGame {
         currentTurn = team;
     }
 
+    @Override
+    public Collection<ChessMove> validMoves(ChessPosition startPosition) {
+        return board.getPiece(startPosition).pieceMoves(board, startPosition);
+    }
+
     /**
      * ONLY USE FOR 2 TEAM GAMES. If 3 or 4 player games are ever implemented, delete this function
      * and replace any uses with setTeamTurn.
@@ -39,15 +43,6 @@ public class ChessGameImp implements chess.ChessGame {
         }
     }
 
-    @Override
-    public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        ChessPiece pieceType = getBoard().getPiece(startPosition);
-        return validMoveHelper(startPosition, pieceType);
-    }
-
-    private Collection<ChessMove> validMoveHelper(ChessPosition startPosition, ChessPiece pieceType) {
-        return null;
-    }
 
     @Override
     public void makeMove(ChessMove move) throws InvalidMoveException {
@@ -55,6 +50,8 @@ public class ChessGameImp implements chess.ChessGame {
         if (pastMoves.containsKey(board)) {
             count = pastMoves.get(board);
             pastMoves.replace(board, count, count + 1);
+        } else {
+            pastMoves.put(board, 1);
         }
     }
 
