@@ -3,18 +3,29 @@ package chessGame;
 import chess.*;
 
 import java.util.Collection;
+import java.util.PrimitiveIterator;
 import java.util.Vector;
 
 public class ChessPieceImp implements chess.ChessPiece {
-    public static ChessPiece OUT_OF_BOUNDS_FOR_MOVE_FINDER;
+    public static ChessPiece OUT_OF_BOUNDS_FOR_MOVE_FINDER = new ChessPieceImp(true);
     ChessGame.TeamColor color;
     PieceType pieceType;
+    boolean isError;
 
+    public boolean isError() {
+        return isError;
+    }
+
+    private ChessPieceImp(boolean isError) {
+        isError = true;
+        color = ChessGame.TeamColor.WHITE;
+        pieceType = PieceType.KING;
+    }
 
     public ChessPieceImp(ChessGame.TeamColor pieceColor, PieceType type) {
         color = pieceColor;
         pieceType = type;
-
+        isError = false;
     }
 
     @Override
@@ -34,7 +45,7 @@ public class ChessPieceImp implements chess.ChessPiece {
         int column = myPosition.getColumn();
         switch (pieceType) {
             case PAWN:
-                if (color == ChessGame.TeamColor.WHITE) {
+                if (color == ChessGame.TeamColor.BLACK) {
                     //top
                     if (row == 1) {
                         ChessPositionImp dest = new ChessPositionImp(3, column);
@@ -120,25 +131,32 @@ public class ChessPieceImp implements chess.ChessPiece {
                     iterate(i, iterator);
                     iterate(i, iterator);
                     iterate(i + 1, iterator);
-                    if (board.getPiece(iterator) != OUT_OF_BOUNDS_FOR_MOVE_FINDER && board.getPiece(iterator).getTeamColor() != color) {
-                        allMoves.add(new ChessMoveImp(myPosition, iterator, null));
-                    }
+                    ifNothingOrEnemyThenAddToMoves(board, myPosition, allMoves, iterator);
                     iterate(i - 1, iterator);
                     iterate(i - 1, iterator);
-                    if (board.getPiece(iterator) != OUT_OF_BOUNDS_FOR_MOVE_FINDER && board.getPiece(iterator).getTeamColor() != color) {
-                        allMoves.add(new ChessMoveImp(myPosition, iterator, null));
-                    }
+                    ifNothingOrEnemyThenAddToMoves(board, myPosition, allMoves, iterator);
                 }
                 break;
             case KING:
-                for (int i = 0; i < 4; i++) {
-                    ChessPositionImp iterator = new ChessPositionImp(row, column);
-                    // 0 is + 1 column, 1 is + 1 row, then -1 col and -1 row
-                    iterate(i, iterator);
-                    if (board.getPiece(iterator) != OUT_OF_BOUNDS_FOR_MOVE_FINDER && board.getPiece(iterator).getTeamColor() != color) {
-                        allMoves.add(new ChessMoveImp(myPosition, iterator, null));
-                    }
-                }
+                ChessPositionImp iterator = new ChessPositionImp(row, column);
+                // 0 is + 1 column, 1 is + 1 row, then -1 col and -1 row
+                iterate(0, iterator);
+                ifNothingOrEnemyThenAddToMoves(board, myPosition, allMoves, iterator);
+                iterate(1, iterator);
+                ifNothingOrEnemyThenAddToMoves(board, myPosition, allMoves, iterator);
+                iterate(2, iterator);
+                ifNothingOrEnemyThenAddToMoves(board, myPosition, allMoves, iterator);
+                iterate(2, iterator);
+                ifNothingOrEnemyThenAddToMoves(board, myPosition, allMoves, iterator);
+                iterate(3, iterator);
+                ifNothingOrEnemyThenAddToMoves(board, myPosition, allMoves, iterator);
+                iterate(3, iterator);
+                ifNothingOrEnemyThenAddToMoves(board, myPosition, allMoves, iterator);
+                iterate(0, iterator);
+                ifNothingOrEnemyThenAddToMoves(board, myPosition, allMoves, iterator);
+                iterate(0, iterator);
+                ifNothingOrEnemyThenAddToMoves(board, myPosition, allMoves, iterator);
+
                 break;
             case BISHOP:
                 getBishopMove(board, myPosition, allMoves, row, column);
@@ -149,6 +167,16 @@ public class ChessPieceImp implements chess.ChessPiece {
                 break;
         }
         return allMoves;
+    }
+
+    private void ifNothingOrEnemyThenAddToMoves(ChessBoard board, ChessPosition myPosition, Vector<ChessMove> allMoves, ChessPositionImp iterator) {
+        if (board.getPiece(iterator) == null) {
+            allMoves.add(new ChessMoveImp(myPosition, iterator, null));
+        } else {
+            if (board.getPiece(iterator) != OUT_OF_BOUNDS_FOR_MOVE_FINDER && board.getPiece(iterator).getTeamColor() != color) {
+                allMoves.add(new ChessMoveImp(myPosition, iterator, null));
+            }
+        }
     }
 
     private void getBishopMove(ChessBoard board, ChessPosition myPosition, Vector<ChessMove> vectorToAdd, int row, int column) {
@@ -207,6 +235,60 @@ public class ChessPieceImp implements chess.ChessPiece {
     }
 
     private static boolean isNotNullOrOOB(ChessPiece chessPiece) {
-        return chessPiece != null && chessPiece != OUT_OF_BOUNDS_FOR_MOVE_FINDER;
+        return chessPiece != null && !isError(chessPiece);
+    }
+
+    private static boolean isError(ChessPiece chessPiece) {
+        return ((ChessPieceImp) chessPiece).isError;
+    }
+
+    public String toString() {
+        if (isError) {
+            return "ERROR - YOU SHOULD NOT SEE THIS";
+        }
+        if (color == ChessGame.TeamColor.WHITE) {
+            switch (pieceType) {
+                case KING -> {
+                    return "K";
+                }
+                case BISHOP -> {
+                    return "B";
+                }
+                case KNIGHT -> {
+                    return "N";
+                }
+                case PAWN -> {
+                    return "P";
+                }
+                case ROOK -> {
+                    return "R";
+                }
+                default -> {
+                    return "Q";
+                }
+            }
+        } else {
+            switch (pieceType) {
+                case KING -> {
+                    return "k";
+                }
+                case BISHOP -> {
+                    return "b";
+                }
+                case KNIGHT -> {
+                    return "n";
+                }
+                case PAWN -> {
+                    return "p";
+                }
+                case ROOK -> {
+                    return "r";
+                }
+                default -> {
+                    return "q";
+                }
+            }
+
+        }
     }
 }

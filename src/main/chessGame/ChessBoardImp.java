@@ -10,7 +10,8 @@ public class ChessBoardImp implements chess.ChessBoard {
     private ChessPiece[][] board;
 
     public ChessBoardImp() {
-        resetBoard();
+        board = new ChessPiece[8][8];
+
     }
 
 
@@ -89,5 +90,24 @@ public class ChessBoardImp implements chess.ChessBoard {
         for (int i = 0; i < 8; i++) {
             board[6][i] = new ChessPieceImp(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            sb.append("|");
+            for (int j = 0; j < 8; j++) {
+                if (board[i][j] == null) {
+                    sb.append(" ");
+                } else {
+                    sb.append(board[i][j].toString());
+                }
+                sb.append("|");
+            }
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 }

@@ -4,18 +4,18 @@ public class ChessPositionImp implements chess.ChessPosition {
     int row, column;
 
     public ChessPositionImp(int row, int column) {
-        this.row = row;
-        this.column = column;
+        this.row = row - 1;
+        this.column = column - 1;
     }
 
     @Override
     public int getRow() {
-        return row;
+        return row + 1;
     }
 
     @Override
     public int getColumn() {
-        return column;
+        return column + 1;
     }
 
     protected void addToColumn(int i) {
@@ -23,6 +23,6 @@ public class ChessPositionImp implements chess.ChessPosition {
     }
 
     protected void addToRow(int i) {
-        row = column + i;
+        row = row + i;
     }
 }

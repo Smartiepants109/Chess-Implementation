@@ -28,7 +28,26 @@ public class ChessGameImp implements chess.ChessGame {
 
     @Override
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        return board.getPiece(startPosition).pieceMoves(board, startPosition);
+        Vector<ChessMove> moves = new Vector<>();
+        Vector<ChessMove> outputMoves = new Vector<>();
+        moves.addAll(board.getPiece(startPosition).pieceMoves(board, startPosition));
+        for (int k = 0; k < moves.size(); k++) {
+            ChessMove move = moves.get(k);
+            ChessBoardImp board1 = new ChessBoardImp();
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    ChessPosition pos = new ChessPositionImp(i + 1, j + 1);
+                    board1.addPiece(pos, board.getPiece(pos));
+                }
+            }
+            board1.movePiece(move.getStartPosition(), move.getEndPosition());
+            if (!checkHelper(board.getPiece(move.getStartPosition()).getTeamColor(), board1)) {
+                outputMoves.add(move);
+            }
+
+        }
+
+        return outputMoves;
     }
 
     /**
@@ -57,12 +76,48 @@ public class ChessGameImp implements chess.ChessGame {
 
     @Override
     public boolean isInCheck(TeamColor teamColor) {
+        return checkHelper(teamColor, board);
+    }
+
+    private boolean checkHelper(TeamColor teamColor, ChessBoard boardUsed) {
+        Vector<ChessMove> moves = new Vector<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                ChessPositionImp pos = new ChessPositionImp(i + 1, j + 1);
+                if (boardUsed.getPiece(pos) != null && boardUsed.getPiece(pos).getTeamColor() != teamColor) {
+                    moves.addAll(board.getPiece(pos).pieceMoves(board, pos));
+                }
+            }
+        }
+        for (ChessMove move : moves) {
+            ChessPiece endPiece = boardUsed.getPiece(move.getEndPosition());
+            if (endPiece != null && endPiece.getTeamColor() == teamColor && endPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                return true;
+            }
+        }
         return false;
     }
 
     @Override
     public boolean isInCheckmate(TeamColor teamColor) {
-        return false;
+        Vector<ChessMove> moves = new Vector<>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                ChessPositionImp pos = new ChessPositionImp(i + 1, j + 1);
+                ChessPiece cp = board.getPiece(pos);
+                if (cp != null && cp.getTeamColor() == teamColor) {
+                    moves.addAll(validMoves(pos)); // if there is a move that YOU can do that would not keep you in check
+                    //then you have been checkmated.
+                    if (moves.size() > 0) {
+                        return false;
+                    }
+                }
+            }
+        }
+        if (moves.size() > 0) {
+            return false; // redundancy. Just in case. I don't trust this project, lol.
+        }
+        return true;
     }
 
     @Override
