@@ -72,6 +72,17 @@ public class ChessGameImp implements chess.ChessGame {
         } else {
             pastMoves.put(board, 1);
         }
+        ChessPosition s = move.getStartPosition();
+        Vector<ChessMove> valids = new Vector<>();
+        valids.addAll(validMoves(s));
+        for (ChessMove move1 : valids) {
+            if (move1.getEndPosition().equals(move.getEndPosition())) {
+                board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+                board.addPiece(move.getStartPosition(), null);
+                return;
+            }
+        }
+        throw new InvalidMoveException("Attempted to move somewhere either illegal or otherwise cause a check");
     }
 
     @Override
