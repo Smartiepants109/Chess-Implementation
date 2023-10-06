@@ -96,7 +96,7 @@ public class ChessGameImp implements chess.ChessGame {
             for (int j = 0; j < 8; j++) {
                 ChessPositionImp pos = new ChessPositionImp(i + 1, j + 1);
                 if (boardUsed.getPiece(pos) != null && boardUsed.getPiece(pos).getTeamColor() != teamColor) {
-                    moves.addAll(board.getPiece(pos).pieceMoves(board, pos));
+                    moves.addAll(boardUsed.getPiece(pos).pieceMoves(boardUsed, pos));
                 }
             }
         }

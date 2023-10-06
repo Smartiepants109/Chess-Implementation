@@ -45,16 +45,16 @@ public class ChessPieceImp implements chess.ChessPiece {
         int column = myPosition.getColumn();
         switch (pieceType) {
             case PAWN:
-                if (color == ChessGame.TeamColor.BLACK) {
+                if (color == ChessGame.TeamColor.WHITE) {
                     //top
-                    if (row == 1) {
-                        ChessPositionImp dest = new ChessPositionImp(3, column);
+                    if (row == 2) {
+                        ChessPositionImp dest = new ChessPositionImp(4, column);
                         if (board.getPiece(dest) == null) {
                             allMoves.add(new ChessMoveImp(myPosition, dest, null));
                         }
                     }
-                    if (row == 6) {
-                        ChessPositionImp dest = new ChessPositionImp(7, column);
+                    if (row == 7) {
+                        ChessPositionImp dest = new ChessPositionImp(8, column);
                         if (board.getPiece(dest) == null) {
                             allMoves.add(new ChessMoveImp(myPosition, dest, PieceType.QUEEN));
                         }
@@ -68,7 +68,7 @@ public class ChessPieceImp implements chess.ChessPiece {
                     ChessPiece temp = board.getPiece(new ChessPositionImp(row + 1, column + 1));
                     if (isNotNullOrOOB(temp)) {
                         PieceType promo = null;
-                        if (row == 6) {
+                        if (row == 7) {
                             promo = PieceType.QUEEN;
                         }
                         allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column + 1), promo));
@@ -76,7 +76,7 @@ public class ChessPieceImp implements chess.ChessPiece {
                     temp = board.getPiece(new ChessPositionImp(row + 1, column - 1));
                     if (isNotNullOrOOB(temp)) {
                         PieceType promo = null;
-                        if (row == 6) {
+                        if (row == 7) {
                             promo = PieceType.QUEEN;
                         }
                         allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column - 1), promo));
@@ -84,14 +84,14 @@ public class ChessPieceImp implements chess.ChessPiece {
 
                 } else {
                     //top
-                    if (row == 6) {
-                        ChessPositionImp dest = new ChessPositionImp(4, column);
+                    if (row == 7) {
+                        ChessPositionImp dest = new ChessPositionImp(5, column);
                         if (board.getPiece(dest) == null) {
                             allMoves.add(new ChessMoveImp(myPosition, dest, null));
                         }
                     }
-                    if (row == 1) {
-                        ChessPositionImp dest = new ChessPositionImp(0, column);
+                    if (row == 2) {
+                        ChessPositionImp dest = new ChessPositionImp(1, column);
                         if (board.getPiece(dest) == null) {
                             allMoves.add(new ChessMoveImp(myPosition, dest, PieceType.QUEEN));
                         }
@@ -105,7 +105,7 @@ public class ChessPieceImp implements chess.ChessPiece {
                     ChessPiece temp = board.getPiece(new ChessPositionImp(row - 1, column + 1));
                     if (isNotNullOrOOB(temp)) {
                         PieceType promo = null;
-                        if (row == 1) {
+                        if (row == 2) {
                             promo = PieceType.QUEEN;
                         }
                         allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column + 1), promo));
@@ -113,7 +113,7 @@ public class ChessPieceImp implements chess.ChessPiece {
                     temp = board.getPiece(new ChessPositionImp(row - 1, column - 1));
                     if (isNotNullOrOOB(temp)) {
                         PieceType promo = null;
-                        if (row == 1) {
+                        if (row == 2) {
                             promo = PieceType.QUEEN;
                         }
                         allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column - 1), promo));
@@ -173,7 +173,7 @@ public class ChessPieceImp implements chess.ChessPiece {
         if (board.getPiece(iterator) == null) {
             allMoves.add(new ChessMoveImp(myPosition, iterator, null));
         } else {
-            if (board.getPiece(iterator) != OUT_OF_BOUNDS_FOR_MOVE_FINDER && board.getPiece(iterator).getTeamColor() != color) {
+            if (isError(board.getPiece(iterator)) && board.getPiece(iterator).getTeamColor() != color) {
                 allMoves.add(new ChessMoveImp(myPosition, iterator, null));
             }
         }
