@@ -112,45 +112,77 @@ public class ChessPieceImp implements chess.ChessPiece {
                 //Included first double, capture moves, and forward march.
                 break;
             case ROOK:
-                for (int i = 0; i < 4; i++) {
-                    ChessPositionImp iterator = new ChessPositionImp(row, column);
-                    // 0 is + 1 column, 1 is + 1 row, then -1 col and -1 row
-                    iterate(i, iterator);
-                    while (board.getPiece(iterator) == null) {
-                        allMoves.add(new ChessMoveImp(myPosition, iterator, null));
-                        iterate(i, iterator);
-                    }
-                    //now have either hit something or perished
-                    if (isNotNullOrOOB(board.getPiece(iterator))) {
-                        allMoves.add(new ChessMoveImp(myPosition, iterator, null));
-                    }
-                }
+                Rook(board, myPosition, allMoves, row, column);
                 break;
             case KNIGHT:
-                break;
-            case KING:
-                break;
-            case BISHOP:
                 for (int i = 0; i < 4; i++) {
                     ChessPositionImp iterator = new ChessPositionImp(row, column);
-                    // 0 is + 1 column, 1 is + 1 row, then -1 col and -1 row
+                    iterate(i, iterator);
                     iterate(i, iterator);
                     iterate(i + 1, iterator);
-                    while (board.getPiece(iterator) == null) {
+                    if (board.getPiece(iterator) != OUT_OF_BOUNDS_FOR_MOVE_FINDER && board.getPiece(iterator).getTeamColor() != color) {
                         allMoves.add(new ChessMoveImp(myPosition, iterator, null));
-                        iterate(i, iterator);
-                        iterate(i + 1, iterator);
                     }
-                    //now have either hit something or perished
-                    if (isNotNullOrOOB(board.getPiece(iterator))) {
+                    iterate(i - 1, iterator);
+                    iterate(i - 1, iterator);
+                    if (board.getPiece(iterator) != OUT_OF_BOUNDS_FOR_MOVE_FINDER && board.getPiece(iterator).getTeamColor() != color) {
                         allMoves.add(new ChessMoveImp(myPosition, iterator, null));
                     }
                 }
                 break;
+            case KING:
+                for (int i = 0; i < 4; i++) {
+                    ChessPositionImp iterator = new ChessPositionImp(row, column);
+                    // 0 is + 1 column, 1 is + 1 row, then -1 col and -1 row
+                    iterate(i, iterator);
+                    if (board.getPiece(iterator) != OUT_OF_BOUNDS_FOR_MOVE_FINDER && board.getPiece(iterator).getTeamColor() != color) {
+                        allMoves.add(new ChessMoveImp(myPosition, iterator, null));
+                    }
+                }
+                break;
+            case BISHOP:
+                getBishopMove(board, myPosition, allMoves, row, column);
+                break;
             case QUEEN:
+                getBishopMove(board, myPosition, allMoves, row, column);
+                Rook(board, myPosition, allMoves, row, column);
                 break;
         }
         return allMoves;
+    }
+
+    private void getBishopMove(ChessBoard board, ChessPosition myPosition, Vector<ChessMove> vectorToAdd, int row, int column) {
+        for (int i = 0; i < 4; i++) {
+            ChessPositionImp iterator = new ChessPositionImp(row, column);
+            // 0 is + 1 column, 1 is + 1 row, then -1 col and -1 row
+            iterate(i, iterator);
+            iterate(i + 1, iterator);
+            while (board.getPiece(iterator) == null) {
+                vectorToAdd.add(new ChessMoveImp(myPosition, iterator, null));
+                iterate(i, iterator);
+                iterate(i + 1, iterator);
+            }
+            //now have either hit something or perished
+            if (isNotNullOrOOB(board.getPiece(iterator)) && board.getPiece(iterator).getTeamColor() != color) {
+                vectorToAdd.add(new ChessMoveImp(myPosition, iterator, null));
+            }
+        }
+    }
+
+    private void Rook(ChessBoard board, ChessPosition myPosition, Vector<ChessMove> collectionToAdd, int row, int column) {
+        for (int i = 0; i < 4; i++) {
+            ChessPositionImp iterator = new ChessPositionImp(row, column);
+            // 0 is + 1 column, 1 is + 1 row, then -1 col and -1 row
+            iterate(i, iterator);
+            while (board.getPiece(iterator) == null) {
+                collectionToAdd.add(new ChessMoveImp(myPosition, iterator, null));
+                iterate(i, iterator);
+            }
+            //now have either hit something or perished
+            if (isNotNullOrOOB(board.getPiece(iterator)) && board.getPiece(iterator).getTeamColor() != color) {
+                collectionToAdd.add(new ChessMoveImp(myPosition, iterator, null));
+            }
+        }
     }
 
     /**

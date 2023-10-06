@@ -1,6 +1,7 @@
 package chessGame;
 
 import chess.ChessBoard;
+import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
@@ -29,38 +30,64 @@ public class ChessBoardImp implements chess.ChessBoard {
      */
     @Override
     public void addPiece(ChessPosition position, ChessPiece piece) {
-        board[position.getRow()][position.getColumn()] = piece;
+        board[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
 
     public void removePiece(ChessPosition position) {
-        board[position.getRow()][position.getColumn()] = null; // RowColumn, or ColumnRow?
+        board[position.getRow() - 1][position.getColumn() - 1] = null; // RowColumn, or ColumnRow?
     }
 
     public void movePiece(ChessPosition start, ChessPosition end) {
         //Track dead pieces? Potential TODO here
-        board[end.getRow()][end.getColumn()] = board[start.getRow()][start.getColumn()];
-        board[start.getRow()][start.getColumn()] = null;
+        board[end.getRow() - 1][end.getColumn() - 1] = board[start.getRow() - 1][start.getColumn() - 1];
+        board[start.getRow() - 1][start.getColumn() - 1] = null;
     }
 
     public void swapPiece(ChessPosition pos1, ChessPosition pos2) {
-        ChessPiece temp = board[pos2.getRow()][pos2.getColumn()];
-        board[pos2.getRow()][pos2.getColumn()] = board[pos1.getRow()][pos1.getColumn()];
-        board[pos1.getRow()][pos1.getColumn()] = temp;
+        ChessPiece temp = board[pos2.getRow() - 1][pos2.getColumn() - 1];
+        board[pos2.getRow() - 1][pos2.getColumn() - 1] = board[pos1.getRow() - 1][pos1.getColumn() - 1];
+        board[pos1.getRow() - 1][pos1.getColumn() - 1] = temp;
     }
 
     @Override
     public ChessPiece getPiece(ChessPosition position) {
         int row, column;
-        row = position.getRow();
-        column  = position.getColumn();
-        if(row < 0 || row > 7 || column < 0 || column > 7){
+        row = position.getRow() - 1;
+        column = position.getColumn() - 1;
+        if (row < 0 || row > 7 || column < 0 || column > 7) {
             return ChessPieceImp.OUT_OF_BOUNDS_FOR_MOVE_FINDER;
         }
-        return board[position.getRow()][position.getColumn()];
+        return board[position.getRow() - 1][position.getColumn() - 1];
     }
 
     @Override
     public void resetBoard() {
         board = new ChessPiece[8][8];
+        int bRow = 0;
+
+        int aRow = 7;
+        board[bRow][0] = new ChessPieceImp(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+        board[bRow][1] = new ChessPieceImp(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+        board[bRow][2] = new ChessPieceImp(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
+        board[bRow][3] = new ChessPieceImp(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN);
+        board[bRow][4] = new ChessPieceImp(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING);
+        board[bRow][5] = new ChessPieceImp(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);
+        board[bRow][6] = new ChessPieceImp(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
+        board[bRow][7] = new ChessPieceImp(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
+        for (int i = 0; i < 8; i++) {
+            board[1][i] = new ChessPieceImp(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
+        }
+
+        board[aRow][7] = new ChessPieceImp(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+        board[aRow][6] = new ChessPieceImp(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
+        board[aRow][5] = new ChessPieceImp(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
+        board[aRow][3] = new ChessPieceImp(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN);
+        board[aRow][4] = new ChessPieceImp(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING);
+        board[aRow][2] = new ChessPieceImp(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP);
+        board[aRow][1] = new ChessPieceImp(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT);
+        board[aRow][0] = new ChessPieceImp(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK);
+        for (int i = 0; i < 8; i++) {
+            board[6][i] = new ChessPieceImp(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+        }
     }
 }
