@@ -2,9 +2,7 @@ package chessGame;
 
 import chess.*;
 
-import java.util.Collection;
-import java.util.PrimitiveIterator;
-import java.util.Vector;
+import java.util.*;
 
 public class ChessPieceImp implements chess.ChessPiece {
     public static ChessPiece OUT_OF_BOUNDS_FOR_MOVE_FINDER = new ChessPieceImp(true);
@@ -12,21 +10,34 @@ public class ChessPieceImp implements chess.ChessPiece {
     PieceType pieceType;
     boolean isError;
 
-    public boolean isError() {
+    public boolean isVariable() {
         return isError;
     }
 
+    public boolean setVariableYes() {
+        if (pieceType == PieceType.QUEEN) {
+            return false;
+        }
+        isError = false;
+        return true;
+    }
+
+
     private ChessPieceImp(boolean isError) {
-        isError = true;
+        this.isError = true;
         color = ChessGame.TeamColor.WHITE;
-        pieceType = PieceType.KING;
+        pieceType = PieceType.QUEEN;
     }
 
     public ChessPieceImp(ChessGame.TeamColor pieceColor, PieceType type) {
         color = pieceColor;
         pieceType = type;
         isError = false;
+        if (pieceType == PieceType.KING || pieceType == PieceType.ROOK || pieceType == PieceType.PAWN) {
+            isError = true; // isError is only an error indicator if the pieceType is a queen.
+        }
     }
+
 
     @Override
     public ChessGame.TeamColor getTeamColor() {
@@ -40,7 +51,7 @@ public class ChessPieceImp implements chess.ChessPiece {
 
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Vector<ChessMove> allMoves = new Vector<>();
+        Set<ChessMove> allMoves = new HashSet<>();
         int row = myPosition.getRow();
         int column = myPosition.getColumn();
         switch (pieceType) {
@@ -49,7 +60,8 @@ public class ChessPieceImp implements chess.ChessPiece {
                     //top
                     if (row == 2) {
                         ChessPositionImp dest = new ChessPositionImp(4, column);
-                        if (board.getPiece(dest) == null) {
+                        ChessPositionImp behindDest = new ChessPositionImp(3, column);
+                        if (board.getPiece(dest) == null && board.getPiece(behindDest) == null) {
                             allMoves.add(new ChessMoveImp(myPosition, dest, null));
                         }
                     }
@@ -57,6 +69,9 @@ public class ChessPieceImp implements chess.ChessPiece {
                         ChessPositionImp dest = new ChessPositionImp(8, column);
                         if (board.getPiece(dest) == null) {
                             allMoves.add(new ChessMoveImp(myPosition, dest, PieceType.QUEEN));
+                            allMoves.add(new ChessMoveImp(myPosition, dest, PieceType.ROOK));
+                            allMoves.add(new ChessMoveImp(myPosition, dest, PieceType.KNIGHT));
+                            allMoves.add(new ChessMoveImp(myPosition, dest, PieceType.BISHOP));
                         }
                     } else {
                         ChessPositionImp dest = new ChessPositionImp(row + 1, column);
@@ -66,27 +81,36 @@ public class ChessPieceImp implements chess.ChessPiece {
                     }
                     //attacking a piece
                     ChessPiece temp = board.getPiece(new ChessPositionImp(row + 1, column + 1));
-                    if (isNotNullOrOOB(temp)) {
+                    if (isNotNullOrOOB(temp) && temp.getTeamColor() != color) {
                         PieceType promo = null;
                         if (row == 7) {
-                            promo = PieceType.QUEEN;
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column + 1), PieceType.QUEEN));
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column + 1), PieceType.BISHOP));
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column + 1), PieceType.ROOK));
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column + 1), PieceType.KNIGHT));
+                        } else {
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column + 1), promo));
                         }
-                        allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column + 1), promo));
                     }
                     temp = board.getPiece(new ChessPositionImp(row + 1, column - 1));
-                    if (isNotNullOrOOB(temp)) {
+                    if (isNotNullOrOOB(temp) && temp.getTeamColor() != color) {
                         PieceType promo = null;
                         if (row == 7) {
-                            promo = PieceType.QUEEN;
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column - 1), PieceType.BISHOP));
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column - 1), PieceType.QUEEN));
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column - 1), PieceType.ROOK));
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column - 1), PieceType.KNIGHT));
+                        } else {
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column - 1), promo));
                         }
-                        allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row + 1, column - 1), promo));
                     }
 
                 } else {
                     //top
                     if (row == 7) {
                         ChessPositionImp dest = new ChessPositionImp(5, column);
-                        if (board.getPiece(dest) == null) {
+                        ChessPositionImp behindDest = new ChessPositionImp(6, column);
+                        if (board.getPiece(dest) == null && board.getPiece(behindDest) == null) {
                             allMoves.add(new ChessMoveImp(myPosition, dest, null));
                         }
                     }
@@ -94,6 +118,9 @@ public class ChessPieceImp implements chess.ChessPiece {
                         ChessPositionImp dest = new ChessPositionImp(1, column);
                         if (board.getPiece(dest) == null) {
                             allMoves.add(new ChessMoveImp(myPosition, dest, PieceType.QUEEN));
+                            allMoves.add(new ChessMoveImp(myPosition, dest, PieceType.BISHOP));
+                            allMoves.add(new ChessMoveImp(myPosition, dest, PieceType.ROOK));
+                            allMoves.add(new ChessMoveImp(myPosition, dest, PieceType.KNIGHT));
                         }
                     } else {
                         ChessPositionImp dest = new ChessPositionImp(row - 1, column);
@@ -103,20 +130,28 @@ public class ChessPieceImp implements chess.ChessPiece {
                     }
                     //attacking a piece
                     ChessPiece temp = board.getPiece(new ChessPositionImp(row - 1, column + 1));
-                    if (isNotNullOrOOB(temp)) {
+                    if (isNotNullOrOOB(temp) && temp.getTeamColor() != color) {
                         PieceType promo = null;
                         if (row == 2) {
-                            promo = PieceType.QUEEN;
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column + 1), PieceType.ROOK));
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column + 1), PieceType.KNIGHT));
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column + 1), PieceType.QUEEN));
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column + 1), PieceType.BISHOP));
+                        } else {
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column + 1), promo));
                         }
-                        allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column + 1), promo));
                     }
                     temp = board.getPiece(new ChessPositionImp(row - 1, column - 1));
-                    if (isNotNullOrOOB(temp)) {
+                    if (isNotNullOrOOB(temp) && temp.getTeamColor() != color) {
                         PieceType promo = null;
                         if (row == 2) {
-                            promo = PieceType.QUEEN;
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column - 1), PieceType.KNIGHT));
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column - 1), PieceType.BISHOP));
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column - 1), PieceType.ROOK));
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column - 1), PieceType.QUEEN));
+                        } else {
+                            allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column - 1), promo));
                         }
-                        allMoves.add(new ChessMoveImp(myPosition, new ChessPositionImp(row - 1, column - 1), promo));
                     }
 
                 }
@@ -138,6 +173,20 @@ public class ChessPieceImp implements chess.ChessPiece {
                 }
                 break;
             case KING:
+                //TODO: Check for castling, if possible, enable.
+                ChessPieceImp leftWhiteStarter = (ChessPieceImp) board.getPiece(ChessPositionImp.DEFTWHITEROOKLEFTSTART);
+                if (leftWhiteStarter != null) {
+                    if (isError && myPosition.equals(ChessPositionImp.DEFTWHITEKINGSTART) && leftWhiteStarter.getPieceType() == PieceType.ROOK && leftWhiteStarter.isError) {
+
+                    }
+                }
+                ChessPieceImp rightWhiteStarter = (ChessPieceImp) board.getPiece(ChessPositionImp.DEFTWHITEROOKRIGHTSTART);
+                if (leftWhiteStarter != null) {
+                    if (isError && myPosition.equals(ChessPositionImp.DEFTWHITEKINGSTART) && rightWhiteStarter.getPieceType() == PieceType.ROOK && rightWhiteStarter.isError) {
+
+                    }
+                }
+
                 ChessPositionImp iterator = new ChessPositionImp(row, column);
                 // 0 is + 1 column, 1 is + 1 row, then -1 col and -1 row
                 iterate(0, iterator);
@@ -169,17 +218,17 @@ public class ChessPieceImp implements chess.ChessPiece {
         return allMoves;
     }
 
-    private void ifNothingOrEnemyThenAddToMoves(ChessBoard board, ChessPosition myPosition, Vector<ChessMove> allMoves, ChessPositionImp iterator) {
+    private void ifNothingOrEnemyThenAddToMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> allMoves, ChessPositionImp iterator) {
         if (board.getPiece(iterator) == null) {
             allMoves.add(new ChessMoveImp(myPosition, iterator, null));
         } else {
-            if (isError(board.getPiece(iterator)) && board.getPiece(iterator).getTeamColor() != color) {
+            if (!isError(board.getPiece(iterator)) && board.getPiece(iterator).getTeamColor() != color) {
                 allMoves.add(new ChessMoveImp(myPosition, iterator, null));
             }
         }
     }
 
-    private void getBishopMove(ChessBoard board, ChessPosition myPosition, Vector<ChessMove> vectorToAdd, int row, int column) {
+    private void getBishopMove(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> vectorToAdd, int row, int column) {
         for (int i = 0; i < 4; i++) {
             ChessPositionImp iterator = new ChessPositionImp(row, column);
             // 0 is + 1 column, 1 is + 1 row, then -1 col and -1 row
@@ -197,7 +246,7 @@ public class ChessPieceImp implements chess.ChessPiece {
         }
     }
 
-    private void Rook(ChessBoard board, ChessPosition myPosition, Vector<ChessMove> collectionToAdd, int row, int column) {
+    private void Rook(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> collectionToAdd, int row, int column) {
         for (int i = 0; i < 4; i++) {
             ChessPositionImp iterator = new ChessPositionImp(row, column);
             // 0 is + 1 column, 1 is + 1 row, then -1 col and -1 row
@@ -239,11 +288,11 @@ public class ChessPieceImp implements chess.ChessPiece {
     }
 
     private static boolean isError(ChessPiece chessPiece) {
-        return ((ChessPieceImp) chessPiece).isError;
+        return ((ChessPieceImp) chessPiece).isError && ((ChessPieceImp) chessPiece).pieceType == PieceType.QUEEN;
     }
 
     public String toString() {
-        if (isError) {
+        if (isError && pieceType == PieceType.QUEEN) {
             return "ERROR - YOU SHOULD NOT SEE THIS";
         }
         if (color == ChessGame.TeamColor.WHITE) {

@@ -3,6 +3,8 @@ package chessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
+import java.util.Objects;
+
 public class ChessMoveImp implements chess.ChessMove {
     ChessPositionImp start;
     ChessPositionImp end;
@@ -27,5 +29,18 @@ public class ChessMoveImp implements chess.ChessMove {
     @Override
     public ChessPiece.PieceType getPromotionPiece() {
         return promoPiece;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessMoveImp move = (ChessMoveImp) o;
+        return Objects.equals(start, move.start) && Objects.equals(end, move.end) && promoPiece == move.promoPiece;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(start, end, promoPiece);
     }
 }

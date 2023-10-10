@@ -73,12 +73,30 @@ public class ChessGameImp implements chess.ChessGame {
             pastMoves.put(board, 1);
         }
         ChessPosition s = move.getStartPosition();
+        if (board.getPiece(s).getTeamColor() != currentTurn) {
+            throw new InvalidMoveException("Attempted to play out of turn.");
+        }
         Vector<ChessMove> valids = new Vector<>();
         valids.addAll(validMoves(s));
         for (ChessMove move1 : valids) {
             if (move1.getEndPosition().equals(move.getEndPosition())) {
-                board.addPiece(move.getEndPosition(), board.getPiece(move.getStartPosition()));
+                ChessPieceImp pi = (ChessPieceImp) board.getPiece(move.getStartPosition());
+                if (move.getPromotionPiece() != null) {
+                    if (move1.getPromotionPiece() != null) {
+                        pi.pieceType = move.getPromotionPiece(); // shortcut, if you can promote to one, any work.
+                    } else {
+                        throw new InvalidMoveException("attempted to promote a piece that wasn't able to do so.");
+                    }
+                }
+                pi.setVariableYes();
+                board.addPiece(move.getEndPosition(), pi);
                 board.addPiece(move.getStartPosition(), null);
+
+                if (currentTurn == TeamColor.WHITE) {
+                    currentTurn = TeamColor.BLACK;
+                } else {
+                    currentTurn = TeamColor.WHITE;
+                }
                 return;
             }
         }
@@ -92,6 +110,17 @@ public class ChessGameImp implements chess.ChessGame {
 
     private boolean checkHelper(TeamColor teamColor, ChessBoard boardUsed) {
         Vector<ChessMove> moves = new Vector<>();
+        insertBasicMovesAvailable(teamColor, boardUsed, moves);
+        for (ChessMove move : moves) {
+            ChessPiece endPiece = boardUsed.getPiece(move.getEndPosition());
+            if (endPiece != null && endPiece.getTeamColor() == teamColor && endPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void insertBasicMovesAvailable(TeamColor teamColor, ChessBoard boardUsed, Vector<ChessMove> moves) {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 ChessPositionImp pos = new ChessPositionImp(i + 1, j + 1);
@@ -100,13 +129,6 @@ public class ChessGameImp implements chess.ChessGame {
                 }
             }
         }
-        for (ChessMove move : moves) {
-            ChessPiece endPiece = boardUsed.getPiece(move.getEndPosition());
-            if (endPiece != null && endPiece.getTeamColor() == teamColor && endPiece.getPieceType() == ChessPiece.PieceType.KING) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -128,6 +150,9 @@ public class ChessGameImp implements chess.ChessGame {
         if (moves.size() > 0) {
             return false; // redundancy. Just in case. I don't trust this project, lol.
         }
+        if (!checkHelper(teamColor, board)) {
+            return false;
+        }
         return true;
     }
 
@@ -138,6 +163,24 @@ public class ChessGameImp implements chess.ChessGame {
                 return true;
             }
         } //Threefold repetition implementation.
+        //no legal moves for u
+        Vector<ChessMove> moves = new Vector<>();
+        for (int i = 1; i < 8; i++) {
+            for (int j = 1; j < 8; j++) {
+                ChessPositionImp pos = new ChessPositionImp(i, j);
+                ChessPiece pc = board.getPiece(pos);
+                if (pc != null) {
+                    if (pc.getTeamColor() == teamColor) {
+                        moves.addAll(validMoves(pos));
+                    }
+                }
+            }
+        }
+        if (moves.size() == 0) {
+            if (!checkHelper(teamColor, board)) {
+                return true;
+            }
+        }
         return false;
     }
 
