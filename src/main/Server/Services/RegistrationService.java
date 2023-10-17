@@ -10,7 +10,7 @@ public class RegistrationService {
 
     /**
      * @param userDAO database access object for user information.
-     * @throws if database is unable to be connected to.
+     * @throws DataAccessException if database is unable to be connected to.
      */
     public RegistrationService(UserDAO userDAO) throws DataAccessException {
         users = userDAO;
@@ -19,7 +19,7 @@ public class RegistrationService {
     /**
      * @param r request object containing information for login attempt.
      * @return response information about your registration attempt.
-     * @throws if database is unable to be connected to.
+     * @throws DataAccessException if database is unable to be connected to.
      */
     RegistrationResponse register(RegistrationRequest r) throws DataAccessException {
         return null;
