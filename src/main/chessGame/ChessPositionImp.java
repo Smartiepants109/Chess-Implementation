@@ -5,12 +5,29 @@ import chess.ChessPosition;
 import java.util.Objects;
 
 public class ChessPositionImp implements chess.ChessPosition {
+    /**
+     * the location that white kings start at.
+     */
     public static final ChessPosition DEFTWHITEKINGSTART = new ChessPositionImp(1,5);
+    /**
+     * The location that white rooks start at.
+     */
     public static final ChessPosition DEFTWHITEROOKLEFTSTART = new ChessPositionImp(1, 1);
+    /**
+     * The location that white rooks start at.
+     */
     public static final ChessPosition DEFTWHITEROOKRIGHTSTART = new ChessPositionImp(1, 8);
 
+    /**
+     * row and column.
+     */
     int row, column;
 
+    /**
+     * generates new position based on coordinates.
+     * @param row the row of the position.
+     * @param column the column of the position.
+     */
     public ChessPositionImp(int row, int column) {
         this.row = row - 1;
         this.column = column - 1;
@@ -26,10 +43,18 @@ public class ChessPositionImp implements chess.ChessPosition {
         return column + 1;
     }
 
+    /**
+     * increments column by i.
+     * @param i adds this number
+     */
     protected void addToColumn(int i) {
         column = column + i;
     }
 
+    /**
+     * increments row by i.
+     * @param i adds this number
+     * */
     protected void addToRow(int i) {
         row = row + i;
     }

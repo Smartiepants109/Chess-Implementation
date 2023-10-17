@@ -7,10 +7,24 @@ import dataAccess.DataAccessException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Allows a user to interact with the database of users.
+ */
 public class UserDAO {
-    Set<User> users = new HashSet<>();
+    /**
+     * placeholder for database.
+     */
+    Set<User> users;
 
     /**
+     * creates the database access object.
+     */
+    public UserDAO(){
+        users = new HashSet<>();
+    }
+
+    /**
+     * attempts to insert a user to the database.
      * @param user user to be added.
      * @return if the insertion was successful.
      * @throws DataAccessException if the database is unable to be accessed.
@@ -20,6 +34,7 @@ public class UserDAO {
     }
 
     /**
+     * attempts to find the user with the username provided.
      * @param username username of account that is being found.
      * @return null if user wasn't found, otherwise returns User object.
      * @throws DataAccessException when the database is unable to be accessed.

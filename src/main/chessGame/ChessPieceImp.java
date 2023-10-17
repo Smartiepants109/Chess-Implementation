@@ -4,10 +4,22 @@ import chess.*;
 
 import java.util.*;
 
+/**
+ * Implementation of the ChessPiece interface
+ */
 public class ChessPieceImp implements chess.ChessPiece {
+    /**
+     * only used if a search function returns something out of bounds.
+     */
     public static ChessPiece OUT_OF_BOUNDS_FOR_MOVE_FINDER = new ChessPieceImp(true);
+    /**
+     * color that the piece is. White or Black
+     */
     ChessGame.TeamColor color;
     PieceType pieceType;
+    /**
+     * For Queens: Error piece, tried to find OoB item. All others: Have they moved? Used for specific rules for Pawn, King, and Rook.
+     */
     boolean isError;
 
     public boolean isVariable() {

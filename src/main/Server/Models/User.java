@@ -1,12 +1,28 @@
 package Server.Models;
 
+/**
+ * User class. Contains a username, password, and an email address.
+ */
 public class User {
+    /**
+     * string containing user's display name.
+     */
     String username;
+    /**
+     * string containing user's password.
+     */
     String pw;
+    /**
+     * string containing user's email address.
+     */
     String email;
+    /**
+     * ID of the game that the user is connected to.
+     */
     int gameIDConnectedTo = 0;
 
     /**
+     * creates a new User profile
      * @param username User's display name.
      * @param password User's security token
      * @param email    address of the user.
@@ -15,6 +31,7 @@ public class User {
         this.username = username;
         this.pw = password;
         this.email = email;
+        gameIDConnectedTo = 0;
     }
 
     public int getGameIDConnectedTo() {
@@ -22,9 +39,10 @@ public class User {
     }
 
     /**
+     * Alters which game you are reported to be connected to. Potential use in future.
      * @param newGameID gameID of game that is being connected to.
      * @return if operation is successful.
-     * Must not be connected to a game already.
+     * Must not be connected to a game already. Sets the game it is connected to to the new ID
      */
     public boolean setConnectedGame(int newGameID) {
         if (this.gameIDConnectedTo == 0) {
@@ -51,6 +69,8 @@ public class User {
     }
 
     /**
+     * Attempts to change the password. Not needed at the moment, but perhaps in the future, depending on how
+     * I code this in the future.
      * @param previousPassword password before change
      * @param newPassword      password after change
      * @return true if operation successful, false if not.

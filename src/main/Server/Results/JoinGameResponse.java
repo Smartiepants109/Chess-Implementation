@@ -1,5 +1,8 @@
 package Server.Results;
 
+/**
+ * Container consisting of a response code and a more detailed message.
+ */
 public class JoinGameResponse {
     /**
      * General information about success or failure of the request. See constants for general use codes.
@@ -31,6 +34,7 @@ public class JoinGameResponse {
     static int OTHER = 500;
 
     /**
+     * creates a new response for other classes.
      * @param code    response code. See static variables for options.
      * @param message More detailed message, if neccesary.
      */

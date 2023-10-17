@@ -5,16 +5,32 @@ import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
+/**
+ * implementation of the ChessBoard class.
+ */
 public class ChessBoardImp implements chess.ChessBoard {
+    /**
+     * width and length of the board. Maintain equality.
+     */
     private static final int BOARD_SIZE = 8;
+    /**
+     * the array containing each piece on the board.
+     */
     private ChessPiece[][] board;
 
+    /**
+     * create a new chess board.
+     */
     public ChessBoardImp() {
         board = new ChessPiece[8][8];
 
     }
 
 
+    /**
+     * copies all information from one board to a new board.
+     * @param oldBoard board to copy
+     */
     public ChessBoardImp(ChessBoard oldBoard) {
         board = new ChessPiece[BOARD_SIZE][BOARD_SIZE];
         for (int i = 0; i < BOARD_SIZE; i++) {
@@ -26,6 +42,7 @@ public class ChessBoardImp implements chess.ChessBoard {
     }
 
     /**
+     * adds a piece to the board at the specified position.
      * @param position where to add the piece to
      * @param piece    the piece to add. DOES NOT COPY. USE PROPER PIECE
      */

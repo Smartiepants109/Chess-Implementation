@@ -5,6 +5,9 @@ import Server.Requests.LoginRequest;
 import Server.Results.LoginResponse;
 import dataAccess.DataAccessException;
 
+/**
+ * Service in charge of logging you into your account.
+ */
 public class LoginService {
 
     /**
@@ -13,6 +16,7 @@ public class LoginService {
     UserDAO users;
 
     /**
+     * Creates the login service.
      * @param userDAO database access object for user information.
      * @throws DataAccessException if database is unable to be accessed.
      */
@@ -21,6 +25,7 @@ public class LoginService {
     }
 
     /**
+     * Attempts to login to a user account based on the request.
      * @param r request object containing information for login attempt.
      * @return whether or not you logged in correctly.
      * @throws DataAccessException if database's connection was unable to be maintained.

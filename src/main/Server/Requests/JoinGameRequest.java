@@ -2,6 +2,9 @@ package Server.Requests;
 
 import Server.Models.User;
 
+/**
+ * Container consisting of all items that are needed to attempt joining a game.
+ */
 public class JoinGameRequest {
     /**
      * ID of game to attempt to join.

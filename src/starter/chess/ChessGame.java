@@ -8,6 +8,7 @@ import java.util.Collection;
 public interface ChessGame {
 
     /**
+     * finds out whose turn it currently is.
      * @return Which team's turn it is
      */
     TeamColor getTeamTurn();
