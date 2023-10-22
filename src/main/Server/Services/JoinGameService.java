@@ -26,13 +26,14 @@ public class JoinGameService {
      * @param games DAO with all the games on it
      * @throws DataAccessException if database is unable to be accessed.
      */
-    public JoinGameService(UserDAO users, GameDAO games) throws DataAccessException {
+    protected JoinGameService(UserDAO users, GameDAO games) throws DataAccessException {
         usersOnServer = users;
         gamesOnServer = games;
     }
 
     /**
      * attempts to join a game.
+     *
      * @param r request to join certain game for certain user.
      * @return response state from database.
      * @throws DataAccessException if database's connection was unable to be maintained.

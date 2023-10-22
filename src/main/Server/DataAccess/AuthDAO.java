@@ -40,7 +40,21 @@ public class AuthDAO {
      * @return the AuthToken object that is found, null if not found.
      * @throws DataAccessException if the database itself is unable to be accessed.
      */
-    private AuthToken findToken(String username) throws DataAccessException {
+    protected AuthToken findToken(String username) throws DataAccessException {
         return null;
     }
+
+    protected Set<AuthToken> findAll() throws DataAccessException {
+        return tokens;
+    }
+
+    protected boolean remove(AuthToken token) throws DataAccessException {
+        return false;
+    }
+
+    protected boolean clear() throws DataAccessException {
+        return false;
+    }
+
+
 }
