@@ -2,8 +2,10 @@ package Server.DataAccess;
 
 import Server.Models.AuthToken;
 import dataAccess.DataAccessException;
+import org.junit.jupiter.api.ClassOrderer;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -52,9 +54,27 @@ public class AuthDAO {
         return false;
     }
 
-    protected boolean clear() throws DataAccessException {
+    public boolean clear() throws DataAccessException {
         return false;
     }
 
 
+    public String generateNewToken() {
+        StringBuilder sb = new StringBuilder();
+        boolean doUntilFalse = true;
+        while (doUntilFalse) {
+            doUntilFalse = false;
+            for (int i = 0; i < 40; i++) {
+                Random r = new Random();
+                sb.append((char) r.nextInt(255));
+            }
+            for (AuthToken t : tokens) {
+                if (t.getAuthToken().equals(sb.toString())) {
+                    doUntilFalse = true;
+                }
+            }
+
+        }
+        return sb.toString();
+    }
 }

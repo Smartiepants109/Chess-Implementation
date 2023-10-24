@@ -97,7 +97,7 @@ public class Game {
      * generates a new game ID that is not repeated anywhere else.
      * @return a new, unique and never used before ID. Will likely be done inside the database for better handling.
      */
-    private int generateUniqueGameID() {
+    public static int generateUniqueGameID() {
         return 0; //FIXME when have access to database, use to find ID that has not been used yet.
     }
 }

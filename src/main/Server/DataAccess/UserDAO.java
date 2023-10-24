@@ -19,12 +19,13 @@ public class UserDAO {
     /**
      * creates the database access object.
      */
-    public UserDAO(){
+    public UserDAO() {
         users = new HashSet<>();
     }
 
     /**
      * attempts to insert a user to the database.
+     *
      * @param user user to be added.
      * @return if the insertion was successful.
      * @throws DataAccessException if the database is unable to be accessed.
@@ -35,6 +36,7 @@ public class UserDAO {
 
     /**
      * attempts to find the user with the username provided.
+     *
      * @param username username of account that is being found.
      * @return null if user wasn't found, otherwise returns User object.
      * @throws DataAccessException when the database is unable to be accessed.
@@ -43,4 +45,7 @@ public class UserDAO {
         return null;
     }
 
+    public void clear() {
+        users = new HashSet<>();
+    }
 }

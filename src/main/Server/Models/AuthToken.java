@@ -22,11 +22,11 @@ public class AuthToken {
     public AuthToken(String uName, String Token) {
     }
 
-    protected String getAuthToken() {
+    public String getAuthToken() {
         return authToken;
     }
 
-    protected String getUsername() {
+    public String getUsername() {
         return username;
     }
 }

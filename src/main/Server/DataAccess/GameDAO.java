@@ -24,6 +24,7 @@ public class GameDAO {
 
     /**
      * attempts to insert a game into the database.
+     *
      * @param game game to be added to the database
      * @return whether or not the game object was successfully added.
      * @throws DataAccessException if the database is unable to be accessed.
@@ -34,11 +35,16 @@ public class GameDAO {
 
     /**
      * tries to find a game from the database.
+     *
      * @param gameID ID of the game to be found.
      * @return the Game object of the found Game. Returns null if not found.
      * @throws DataAccessException if the database is unable to be accessed.
      */
     public Game findGame(int gameID) throws DataAccessException {
         return null;
+    }
+
+    public void clear() {
+        games = new HashSet<>();
     }
 }
