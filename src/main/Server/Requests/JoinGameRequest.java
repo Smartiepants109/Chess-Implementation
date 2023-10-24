@@ -1,6 +1,8 @@
 package Server.Requests;
 
+import Server.Models.AuthToken;
 import Server.Models.User;
+import chess.ChessGame;
 
 /**
  * Container consisting of all items that are needed to attempt joining a game.
@@ -13,23 +15,30 @@ public class JoinGameRequest {
     /**
      * User object correlating to user attempting to join a game.
      */
-    User userJoining;
+    AuthToken token;
+    ChessGame.TeamColor color;
 
     public int getGameIdToJoin() {
         return gameIdToJoin;
     }
 
-    public User getUserJoining() {
-        return userJoining;
+    public AuthToken getUserJoining() {
+        return token;
+    }
+
+    public ChessGame.TeamColor getColor() {
+        return color;
     }
 
     /**
      * creates a new Request to join a specific game.
+     *
      * @param gameIdToJoin The database ID of the game that is being attempted to join.
-     * @param userJoining The User class, recieved from UserDAO, of the person trying to join.
+     * @param userJoining  The User class, recieved from UserDAO, of the person trying to join.
      */
-    public JoinGameRequest(int gameIdToJoin, User userJoining){
+    public JoinGameRequest(int gameIdToJoin, AuthToken userJoining, ChessGame.TeamColor color) {
         this.gameIdToJoin = gameIdToJoin;
-        this.userJoining = userJoining;
+        this.token = userJoining;
+        this.color = color;
     }
 }

@@ -42,15 +42,15 @@ public class AuthDAO {
      * @return the AuthToken object that is found, null if not found.
      * @throws DataAccessException if the database itself is unable to be accessed.
      */
-    protected AuthToken findToken(String username) throws DataAccessException {
+    public AuthToken findToken(String username) throws DataAccessException {
         return null;
     }
 
-    protected Set<AuthToken> findAll() throws DataAccessException {
+    public Set<AuthToken> findAll() throws DataAccessException {
         return tokens;
     }
 
-    protected boolean remove(AuthToken token) throws DataAccessException {
+    public boolean remove(AuthToken token) throws DataAccessException {
         return false;
     }
 
@@ -76,5 +76,13 @@ public class AuthDAO {
 
         }
         return sb.toString();
+    }
+
+    public boolean tokenValid(AuthToken userJoining) throws DataAccessException {
+        AuthToken t = findToken(userJoining.getUsername());
+        if (userJoining.getAuthToken().equals(t.getAuthToken())) {
+            return true;
+        }
+        return false;
     }
 }

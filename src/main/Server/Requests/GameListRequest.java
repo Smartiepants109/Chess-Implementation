@@ -1,5 +1,7 @@
 package Server.Requests;
 
+import Server.Models.AuthToken;
+
 /**
  * A data container that is passed to the LoginService to be parsed into information.
  */
@@ -15,10 +17,11 @@ public class GameListRequest {
 
     /**
      * creates a new login request.
+     *
      * @param username User class identifier that user is use authentication for
      * @param password password of User.
      */
-    public GameListRequest(String username, String password){
+    public GameListRequest(String username, String password) {
         this.username = username;
         this.password = password;
     }
@@ -29,5 +32,9 @@ public class GameListRequest {
 
     public String getUsername() {
         return username;
+    }
+
+    public AuthToken getToken() {
+        return new AuthToken(username, password);
     }
 }

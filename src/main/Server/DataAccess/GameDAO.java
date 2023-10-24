@@ -2,6 +2,7 @@ package Server.DataAccess;
 
 import Server.Models.Game;
 import dataAccess.DataAccessException;
+import com.google.gson.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -47,4 +48,12 @@ public class GameDAO {
     public void clear() {
         games = new HashSet<>();
     }
+
+    public String findall() {
+        GsonBuilder gb = new GsonBuilder();
+        gb.setPrettyPrinting();
+        Gson gson = gb.create();
+        return gson.toJson(games);
+    }
+
 }

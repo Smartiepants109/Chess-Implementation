@@ -23,7 +23,7 @@ public class LogoutRequest {
         this.password = password;
     }
 
-    public String getPassword() {
+    public String getToken() {
         return password;
     }
 

@@ -39,6 +39,10 @@ public class GameListService {
      * @throws DataAccessException if database's connection was unable to be maintained.
      */
     public GameListResponse listGames(GameListRequest r) throws DataAccessException {
-        return null;
+        if (tokens.tokenValid(r.getToken())) {
+            return new GameListResponse(200, games.findall());
+        } else {
+            return new GameListResponse(401, "Error: unauthorized");
+        }
     }
 }

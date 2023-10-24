@@ -3,9 +3,8 @@ package Server.Services;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Requests.GameListRequest;
+import Server.Models.AuthToken;
 import Server.Requests.LogoutRequest;
-import Server.Results.GameListResponse;
 import Server.Results.LogoutResponse;
 import dataAccess.DataAccessException;
 
@@ -39,6 +38,16 @@ public class LogoutService {
      * @throws DataAccessException if database's connection was unable to be maintained.
      */
     public LogoutResponse logout(LogoutRequest r) throws DataAccessException {
-        return null;
+        String token = r.getToken();
+        String username = r.getUsername();
+        AuthToken t = tokens.findToken(username);
+        if (t == null) {
+            return new LogoutResponse(401, "Error: Unauthorized");
+        }
+        if (t.getAuthToken().equals(token)) {
+            return new LogoutResponse(200, "");
+        } else {
+            return new LogoutResponse(500, "Error: invalid credentials.");
+        }
     }
 }
