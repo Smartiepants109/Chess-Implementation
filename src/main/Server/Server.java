@@ -1,5 +1,8 @@
 package Server;
 
+import Server.DataAccess.AuthDAO;
+import Server.DataAccess.GameDAO;
+import Server.DataAccess.UserDAO;
 import Server.Models.AuthToken;
 import Server.Requests.*;
 import Server.Results.*;
@@ -7,11 +10,12 @@ import Server.Services.*;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
-import spark.*;
+import spark.Request;
+import spark.Response;
+import spark.Spark;
 
-import java.util.*;
+import java.util.Map;
 
-import Server.DataAccess.*;
 
 public class Server {
     AuthDAO tokens = new AuthDAO();
@@ -81,10 +85,15 @@ public class Server {
     }
 
     private Object loginHandler(Request req, Response res) throws DataAccessException {
-        LoginRequest loginRequest = new LoginRequest(req.params(":username"), req.params(":password"));
+        String body = req.body();
+        LoginRequest loginRequest = new LoginRequest(getParameter(body, "username"), getParameter(body, "password"));
         LoginService ls = new LoginService(users, tokens);
         LoginResponse lr = ls.login(loginRequest);
         return gson.toJson(lr);
+    }
+
+    private static String getAuthToken(Request req) {
+        return req.headers("authorization");
     }
 
     private Object logoutHandler(Request req, Response res) throws DataAccessException {
@@ -95,11 +104,20 @@ public class Server {
     }
 
     private Object registerHandler(Request req, Response res) throws DataAccessException {
-        RegistrationRequest registrationRequest = new RegistrationRequest(req.params(":Username"),
-                req.params(":password"), req.params(":email"));
+        String body = req.body();
+        String username = getParameter(body, "username");
+        String pw = getParameter(body, "password");
+        String email = getParameter(body, "email");
+        RegistrationRequest registrationRequest = new RegistrationRequest(username,
+                pw, email);
         RegistrationService rs = new RegistrationService(users, tokens);
         RegistrationResponse rr = rs.register(registrationRequest);
         return gson.toJson(rr);
+    }
+
+    private String getParameter(String body, String parameter) {
+        Map<String, String> pain = gson.fromJson(body, Map.class);
+        return pain.get(parameter);
     }
 
 

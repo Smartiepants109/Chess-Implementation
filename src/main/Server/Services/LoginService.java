@@ -6,7 +6,6 @@ import Server.Models.AuthToken;
 import Server.Models.User;
 import Server.Requests.LoginRequest;
 import Server.Results.LoginResponse;
-import Server.Results.RegistrationResponse;
 import dataAccess.DataAccessException;
 
 /**

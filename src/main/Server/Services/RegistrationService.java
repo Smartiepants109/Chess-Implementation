@@ -6,6 +6,7 @@ import Server.Models.AuthToken;
 import Server.Models.User;
 import Server.Requests.RegistrationRequest;
 import Server.Results.RegistrationResponse;
+import com.google.gson.Gson;
 import dataAccess.DataAccessException;
 
 /**
@@ -46,7 +47,7 @@ public class RegistrationService {
                 if (users.insertUser(new User(username, password, email))) {
                     AuthToken authToken = new AuthToken(username, tokens.generateNewToken());
                     tokens.insertToken(authToken);
-                    return new RegistrationResponse(200, "{\"username\":\"" + username + "\", \"authToken\":\"" + authToken.toString() + "\"}");
+                    return new RegistrationResponse(200, new Gson().toJson(authToken));
                 } else {
                     throw new DataAccessException("Somehow, Palpati- I mean, this failed.");
                 }

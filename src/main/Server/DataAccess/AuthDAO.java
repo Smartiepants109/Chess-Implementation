@@ -2,7 +2,6 @@ package Server.DataAccess;
 
 import Server.Models.AuthToken;
 import dataAccess.DataAccessException;
-import org.junit.jupiter.api.ClassOrderer;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -66,7 +65,7 @@ public class AuthDAO {
             doUntilFalse = false;
             for (int i = 0; i < 40; i++) {
                 Random r = new Random();
-                sb.append((char) r.nextInt(255));
+                sb.append((char) (r.nextInt(90) + 32));
             }
             for (AuthToken t : tokens) {
                 if (t.getAuthToken().equals(sb.toString())) {

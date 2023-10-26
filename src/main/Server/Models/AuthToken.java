@@ -16,10 +16,13 @@ public class AuthToken {
 
     /**
      * creates a new authentication token.
+     *
      * @param uName Username of owner of token.
      * @param Token Security token.
      */
     public AuthToken(String uName, String Token) {
+        this.authToken = Token;
+        this.username = uName;
     }
 
     public String getAuthToken() {

@@ -1,6 +1,5 @@
 package Server.DataAccess;
 
-import Server.Models.Game;
 import Server.Models.User;
 import dataAccess.DataAccessException;
 
@@ -42,6 +41,11 @@ public class UserDAO {
      * @throws DataAccessException when the database is unable to be accessed.
      */
     public User findToken(String username) throws DataAccessException {//username? Email? Find out which.
+        for (User u : users) {
+            if (u.getUsername().equals(username)) {
+                return u;
+            }
+        }
         return null;
     }
 
