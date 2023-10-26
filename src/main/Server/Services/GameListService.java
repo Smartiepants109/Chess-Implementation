@@ -42,7 +42,7 @@ public class GameListService {
         if (tokens.tokenValid(r.getToken())) {
             return new GameListResponse(200, games.findall());
         } else {
-            return new GameListResponse(401, "Error: unauthorized");
+            return new GameListResponse(401, null);
         }
     }
 }

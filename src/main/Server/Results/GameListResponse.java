@@ -1,5 +1,9 @@
 package Server.Results;
 
+import Server.Models.Game;
+
+import java.util.Set;
+
 /**
  * Container for response information for specific attacks.
  */
@@ -11,7 +15,7 @@ public class GameListResponse {
     /**
      * String containing more return information than the response code..
      */
-    String responseMessage;
+    Set<Game> responseMessage;
     /**
      * code for when a request is carried out successfully
      */
@@ -28,10 +32,11 @@ public class GameListResponse {
 
     /**
      * creates a response using the provided code and message
-     * @param code the integer code that corresponds with the success or error state.
+     *
+     * @param code    the integer code that corresponds with the success or error state.
      * @param message a more detailed textual version of the code provided previously.
      */
-    public GameListResponse(int code, String message) {
+    public GameListResponse(int code, Set<Game> message) {
         responseCode = code;
         responseMessage = message;
     }

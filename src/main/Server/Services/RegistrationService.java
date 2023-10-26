@@ -36,7 +36,7 @@ public class RegistrationService {
      * @return response information about your registration attempt.
      * @throws DataAccessException if database is unable to be connected to.
      */
-    RegistrationResponse register(RegistrationRequest r) throws DataAccessException {
+    public RegistrationResponse register(RegistrationRequest r) throws DataAccessException {
         String username, password, email;
         username = r.getUsername();
         password = r.getPassword();

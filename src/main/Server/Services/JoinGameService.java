@@ -30,7 +30,7 @@ public class JoinGameService {
      * @param games DAO with all the games on it
      * @throws DataAccessException if database is unable to be accessed.
      */
-    protected JoinGameService(UserDAO users, GameDAO games, AuthDAO tokens) throws DataAccessException {
+    public JoinGameService(UserDAO users, GameDAO games, AuthDAO tokens) throws DataAccessException {
         usersOnServer = users;
         gamesOnServer = games;
         this.tokens = tokens;

@@ -50,8 +50,8 @@ public class LoginService {
             AuthToken authToken = new AuthToken(username, tokens.generateNewToken());
             tokens.insertToken(authToken);
             return new LoginResponse(200, "{\"username\":\"" + username + "\", \"authToken\":\"" + authToken.toString() + "\"}");
+        } else {
+            return new LoginResponse(401, "Error: unauthorized");
         }
-
-        return null;
     }
 }

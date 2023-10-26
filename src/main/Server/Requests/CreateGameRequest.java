@@ -13,24 +13,29 @@ public class CreateGameRequest {
     /**
      * User object correlating to user attempting to create a game.
      */
-    User userCreating;
+    String userCreating;
+    String pw;
+
+    public String getPw() {
+        return pw;
+    }
 
     public String getGameIdToJoin() {
         return gameName;
     }
 
-    public User getUserJoining() {
+    public String getUserJoining() {
         return userCreating;
     }
 
     /**
      * creates a new Request to create a specific game.
      *
-     * @param gameName     The database ID of the game that is being attempted to create.
-     * @param creatingUser The User class, recieved from UserDAO, of the person trying to create.
+     * @param gameName The database name of the game that is being attempted to create.
      */
-    public CreateGameRequest(String gameName, User creatingUser) {
+    public CreateGameRequest(String gameName, String username, String password) {
         this.gameName = gameName;
-        this.userCreating = creatingUser;
+        this.userCreating = username;
+        this.pw = password;
     }
 }

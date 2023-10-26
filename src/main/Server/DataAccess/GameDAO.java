@@ -49,11 +49,8 @@ public class GameDAO {
         games = new HashSet<>();
     }
 
-    public String findall() {
-        GsonBuilder gb = new GsonBuilder();
-        gb.setPrettyPrinting();
-        Gson gson = gb.create();
-        return gson.toJson(games);
+    public Set<Game> findall() {
+        return games;
     }
 
 }
