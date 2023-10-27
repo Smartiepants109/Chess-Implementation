@@ -46,17 +46,22 @@ public class JoinGameService {
     public JoinGameResponse joinGame(JoinGameRequest r) throws DataAccessException {
         if (tokens.tokenValid(r.getUserJoining())) {
             if (gamesOnServer.findGame(r.getGameIdToJoin()) == null) {
-                return new JoinGameResponse(500, "Error: Game does not exist.");
+                return new JoinGameResponse(400, "Error: Game does not exist.");
             } else {
                 Game g = (gamesOnServer.findGame(r.getGameIdToJoin()));
+                if (r.getColor() == null) {
+                    return new JoinGameResponse(200, null);
+                }
                 if (r.getColor().equals(ChessGame.TeamColor.WHITE)) {
                     if (g.getWhiteUsername() == null) {
-                        return new JoinGameResponse(200, "");
+                        g.setUsernameW(r.getUserJoining().getUsername());
+                        return new JoinGameResponse(200, null);
                     } else {
                         return new JoinGameResponse(403, "Error: already taken");
                     }
                 } else {
                     if (g.getBlackUsername() == null) {
+                        g.setUsernameB(r.getUserJoining().getUsername());
                         return new JoinGameResponse(200, "");
                     } else {
                         return new JoinGameResponse(403, "Error: already taken");

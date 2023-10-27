@@ -46,21 +46,31 @@ public class Server {
     }
 
     private Object joinGameHandler(Request request, Response response) throws DataAccessException {
-        AuthData authData = new AuthData(request.params(":username"), request.params("password"));
-        ChessGame.TeamColor color;
-        if (request.params(":playerColor").equals("WHITE")) {
-            color = ChessGame.TeamColor.WHITE;
+        AuthData authData = getAuthData(request);
+
+        ChessGame.TeamColor color = null;
+        String body = request.body();
+        String colorSTR = getParameter(body, "playerColor");
+        if (colorSTR == null) {
+            color = null;
         } else {
-            if (request.params(":playerColor").equals("BLACK")) {
-                color = ChessGame.TeamColor.BLACK;
+            if (colorSTR.equals("WHITE")) {
+                color = ChessGame.TeamColor.WHITE;
             } else {
-                throw new DataAccessException("should not attempt to connect to a game as NULL player.");
+                color = ChessGame.TeamColor.BLACK;
             }
         }
-        JoinGameRequest joinGameRequest = new JoinGameRequest(Integer.parseInt(request.params(":gameID")), authData, color);
+        JoinGameRequest joinGameRequest = new JoinGameRequest(getIntParameter(body, "gameID"), authData, color);
         JoinGameService ls = new JoinGameService(users, games, tokens);
         JoinGameResponse lr = ls.joinGame(joinGameRequest);
+        response.status(lr.getstatcode());
         return gson.toJson(lr);
+    }
+
+    private AuthData getAuthData(Request request) {
+        String token = getAuthToken(request);
+        String user = tokens.findUsernameFromToken(token);
+        return new AuthData(user, token);
     }
 
     private Object clearDBHandler(Request request, Response response) throws DataAccessException {
@@ -71,17 +81,24 @@ public class Server {
     }
 
     private Object createGameHandler(Request request, Response response) throws DataAccessException {
-        CreateGameRequest createGameRequest = new CreateGameRequest(request.params(":gameName"), request.params(":username"), request.params(":password"));
+        String body = request.body();
+        String authToken = getAuthToken(request);
+        String username = tokens.findUsernameFromToken(authToken);
+        CreateGameRequest createGameRequest = new CreateGameRequest((getParameter(body, "gameName")),
+                username, authToken);
         CreateGameService ls = new CreateGameService(users, games, tokens);
         CreateGameResponse lr = ls.createGame(createGameRequest);
+        response.status(lr.getStatus());
         return gson.toJson(lr);
     }
 
     private Object listGameHandler(Request request, Response response) throws DataAccessException {
-        AuthData token = gson.fromJson(getAuthToken(request), AuthData.class);
+
+        AuthData token = getAuthData(request);
         GameListRequest gameListRequest = new GameListRequest(token.getUsername(), token.getAuthToken());
         GameListService ls = new GameListService(users, games, tokens);
         GameListResponse lr = ls.listGames(gameListRequest);
+        response.status(lr.getCode());
         return gson.toJson(lr);
     }
 
@@ -90,6 +107,7 @@ public class Server {
         LoginRequest loginRequest = new LoginRequest(getParameter(body, "username"), getParameter(body, "password"));
         LoginService ls = new LoginService(users, tokens);
         LoginResponse lr = ls.login(loginRequest);
+        res.status(lr.getResponseCode());
         return gson.toJson(lr);
     }
 
@@ -98,10 +116,11 @@ public class Server {
     }
 
     private Object logoutHandler(Request req, Response res) throws DataAccessException {
-        AuthData token = gson.fromJson(getAuthToken(req), AuthData.class);
-        LogoutRequest logoutRequest = new LogoutRequest(token.getUsername(), token.getAuthToken());
+        String token = (getAuthToken(req));
+        LogoutRequest logoutRequest = new LogoutRequest(tokens.findUsernameFromToken(token), token);
         LogoutService ls = new LogoutService(users, games, tokens);
         LogoutResponse lr = ls.logout(logoutRequest);
+        res.status(lr.getStatusCode());
         return gson.toJson(lr);
     }
 
@@ -114,12 +133,22 @@ public class Server {
                 pw, email);
         RegistrationService rs = new RegistrationService(users, tokens);
         RegistrationResponse rr = rs.register(registrationRequest);
+        res.status(rr.getStatusCode());
         return gson.toJson(rr);
     }
 
     private String getParameter(String body, String parameter) {
         Map<String, String> pain = gson.fromJson(body, Map.class);
-        return pain.get(parameter);
+        if (pain.containsKey(parameter)) {
+            return pain.get(parameter);
+        }
+        return null;
+    }
+
+    private int getIntParameter(String body, String parameter) {
+        Map<String, Double> pain = gson.fromJson(body, Map.class);
+        Double out = pain.get(parameter);
+        return out.intValue();
     }
 
 

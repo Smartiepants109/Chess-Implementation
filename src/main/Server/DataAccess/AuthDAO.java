@@ -42,6 +42,11 @@ public class AuthDAO {
      * @throws DataAccessException if the database itself is unable to be accessed.
      */
     public AuthData findToken(String username) throws DataAccessException {
+        for (AuthData a : tokens) {
+            if (a.getUsername().equals(username)) {
+                return a;
+            }
+        }
         return null;
     }
 
@@ -50,25 +55,24 @@ public class AuthDAO {
     }
 
     public boolean remove(AuthData token) throws DataAccessException {
-        return false;
+        return tokens.remove(token);
     }
 
     public boolean clear() throws DataAccessException {
-        return false;
+        tokens = new HashSet<>();
+        return true;
     }
 
 
     public String generateNewToken() {
-        StringBuilder sb = new StringBuilder();
+        String sb = "";
         boolean doUntilFalse = true;
         while (doUntilFalse) {
             doUntilFalse = false;
-            for (int i = 0; i < 40; i++) {
-                Random r = new Random();
-                sb.append((char) (r.nextInt(90) + 32));
-            }
+            sb = getRandomString();
+
             for (AuthData t : tokens) {
-                if (t.getAuthToken().equals(sb.toString())) {
+                if (t.getAuthToken().equals(sb)) {
                     doUntilFalse = true;
                 }
             }
@@ -77,11 +81,38 @@ public class AuthDAO {
         return sb.toString();
     }
 
+    private String getRandomString() {
+
+        String lettersAndNumbers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        StringBuilder sb = new StringBuilder();
+        Random rnd = new Random();
+        while (sb.length() < 40) { // length of the random string.
+            int index = (int) (rnd.nextFloat() * lettersAndNumbers.length());
+            sb.append(lettersAndNumbers.charAt(index));
+        }
+        return sb.toString();
+    }
+
     public boolean tokenValid(AuthData userJoining) throws DataAccessException {
+        if (userJoining.getUsername() == null) {
+            return false;
+        }
+        if (userJoining.getAuthToken() == null) {
+            return false;
+        }
         AuthData t = findToken(userJoining.getUsername());
         if (userJoining.getAuthToken().equals(t.getAuthToken())) {
             return true;
         }
         return false;
+    }
+
+    public String findUsernameFromToken(String token) {
+        for (AuthData a : tokens) {
+            if (a.getAuthToken().equals(token)) {
+                return a.getUsername();
+            }
+        }
+        return null;
     }
 }

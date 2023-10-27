@@ -12,10 +12,11 @@ public class GameListResponse {
      * int corresponding to one of the static response codes. See static variables for more info.
      */
     int responseCode;
+    String message;
     /**
      * String containing more return information than the response code..
      */
-    Set<Game> message;
+    Set<Game> games;
     /**
      * code for when a request is carried out successfully
      */
@@ -33,11 +34,21 @@ public class GameListResponse {
     /**
      * creates a response using the provided code and message
      *
-     * @param code    the integer code that corresponds with the success or error state.
-     * @param message a more detailed textual version of the code provided previously.
+     * @param code  the integer code that corresponds with the success or error state.
+     * @param games a more detailed textual version of the code provided previously.
      */
-    public GameListResponse(int code, Set<Game> message) {
+    public GameListResponse(int code, Set<Game> games) {
         responseCode = code;
+        this.games = games;
+    }
+
+    public GameListResponse(int code, String message) {
+        responseCode = code;
+        this.games = null;
         this.message = message;
+    }
+
+    public int getCode() {
+        return responseCode;
     }
 }

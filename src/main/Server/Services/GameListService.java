@@ -3,9 +3,7 @@ package Server.Services;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Requests.CreateGameRequest;
 import Server.Requests.GameListRequest;
-import Server.Results.CreateGameResponse;
 import Server.Results.GameListResponse;
 import dataAccess.DataAccessException;
 
@@ -42,7 +40,7 @@ public class GameListService {
         if (tokens.tokenValid(r.getToken())) {
             return new GameListResponse(200, games.findall());
         } else {
-            return new GameListResponse(401, null);
+            return new GameListResponse(401, "Error: unauthorized");
         }
     }
 }

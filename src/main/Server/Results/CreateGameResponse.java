@@ -8,6 +8,7 @@ public class CreateGameResponse {
      * General information about success or failure of the request. See constants for general use codes.
      */
     int responseCode;
+    Integer gameID;
     /**
      * Message that is alongside the code.
      */
@@ -39,5 +40,16 @@ public class CreateGameResponse {
     public CreateGameResponse(int code, String message) {
         responseCode = code;
         this.message = message;
+        this.gameID = null;
+    }
+
+    public CreateGameResponse(int code, int gameID) {
+        responseCode = code;
+        this.gameID = gameID;
+        message = null;
+    }
+
+    public int getStatus() {
+        return responseCode;
     }
 }

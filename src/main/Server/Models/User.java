@@ -16,10 +16,6 @@ public class User {
      * string containing user's email address.
      */
     String email;
-    /**
-     * ID of the game that the user is connected to.
-     */
-    int gameIDConnectedTo = 0;
 
     /**
      * creates a new User profile
@@ -32,11 +28,6 @@ public class User {
         this.username = username;
         this.pw = password;
         this.email = email;
-        gameIDConnectedTo = 0;
-    }
-
-    public int getGameIDConnectedTo() {
-        return gameIDConnectedTo;
     }
 
     /**
@@ -46,26 +37,14 @@ public class User {
      * @return if operation is successful.
      * Must not be connected to a game already. Sets the game it is connected to to the new ID
      */
-    public boolean setConnectedGame(int newGameID) {
-        if (this.gameIDConnectedTo == 0) {
-            this.gameIDConnectedTo = newGameID;
-            return true;
-        }
-        return false;
-    }
+
 
     /**
      * Removes gameID of previously connected game. Must be connected to a game to perform operation.
      *
      * @return if operation is successful
      */
-    public boolean disconnect() {
-        if (this.gameIDConnectedTo != 0) {
-            this.gameIDConnectedTo = 0;
-            return true;
-        }
-        return false;
-    }
+
 
     protected String getPassword() {
         return pw;

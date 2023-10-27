@@ -10,10 +10,16 @@ public class LoginResponse {
      * int corresponding to one of the static response codes. See static variables for more info.
      */
     int responseCode;
+
+    public int getResponseCode() {
+        return responseCode;
+    }
+
     /**
      * String containing more return information than the response code..
      */
     String message;
+
 
     /**
      * code for when a request is carried out successfully

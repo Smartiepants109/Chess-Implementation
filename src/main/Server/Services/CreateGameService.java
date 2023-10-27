@@ -3,9 +3,9 @@ package Server.Services;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Requests.ClearRequest;
+import Server.Models.AuthData;
+import Server.Models.Game;
 import Server.Requests.CreateGameRequest;
-import Server.Results.ClearResponse;
 import Server.Results.CreateGameResponse;
 import dataAccess.DataAccessException;
 
@@ -39,7 +39,14 @@ public class CreateGameService {
      * @throws DataAccessException if database's connection was unable to be maintained.
      */
     public CreateGameResponse createGame(CreateGameRequest r) throws DataAccessException {
-
-        return null;
+        AuthData ad = new AuthData(r.getUserJoining(), r.getPw());
+        if (!tokens.tokenValid(ad)) {
+            return new CreateGameResponse(401, "Error: unauthorized");
+        }
+        Game game = new Game(games.generateUniqueID());
+        game.setGameName(r.getGameName());
+        games.insertGame(game);
+        CreateGameResponse res = new CreateGameResponse(200, game.getGameID());
+        return res;
     }
 }

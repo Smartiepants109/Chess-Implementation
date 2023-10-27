@@ -12,6 +12,9 @@ public class RegistrationResponse {
      * message containing more details about result.
      */
     String message;
+    String username;
+    String authToken;
+
     /**
      * response code for a success.
      */
@@ -38,5 +41,18 @@ public class RegistrationResponse {
     public RegistrationResponse(int code, String message) {
         responseCode = code;
         this.message = message;
+        username = null;
+        authToken = null;
+    }
+
+    public RegistrationResponse(int code, String username, String authToken) {
+        responseCode = code;
+        this.username = username;
+        this.authToken = authToken;
+        message = null;
+    }
+
+    public int getStatusCode() {
+        return responseCode;
     }
 }

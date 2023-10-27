@@ -1,7 +1,5 @@
 package Server.Requests;
 
-import Server.Models.User;
-
 /**
  * Container consisting of all items that are needed to attempt creating a game.
  */
@@ -10,6 +8,11 @@ public class CreateGameRequest {
      * ID of game to attempt to create.
      */
     String gameName;
+
+    public String getGameName() {
+        return gameName;
+    }
+
     /**
      * User object correlating to user attempting to create a game.
      */
@@ -18,10 +21,6 @@ public class CreateGameRequest {
 
     public String getPw() {
         return pw;
-    }
-
-    public String getGameIdToJoin() {
-        return gameName;
     }
 
     public String getUserJoining() {

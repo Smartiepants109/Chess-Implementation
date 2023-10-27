@@ -2,9 +2,9 @@ package Server.DataAccess;
 
 import Server.Models.Game;
 import dataAccess.DataAccessException;
-import com.google.gson.*;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -42,6 +42,11 @@ public class GameDAO {
      * @throws DataAccessException if the database is unable to be accessed.
      */
     public Game findGame(int gameID) throws DataAccessException {
+        for (Game g: games) {
+            if(g.getGameID() == gameID){
+                return g;
+            }
+        }
         return null;
     }
 
@@ -53,4 +58,22 @@ public class GameDAO {
         return games;
     }
 
+    public int generateUniqueID() {
+        Random r = new Random();
+        int result = 0;
+        boolean canLeave = false;
+        while (!canLeave) {
+            canLeave = true;
+            result = r.nextInt();
+            if (result < 0) {
+                result = result * -1;
+            }
+            for (Game t : games) {
+                if (t.getGameID() == result) {
+                    canLeave = false;
+                }
+            }
+        }
+        return result;
+    }
 }

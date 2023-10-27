@@ -27,11 +27,16 @@ public class LogoutResponse {
 
     /**
      * creates a response using the provided code and message
-     * @param code the integer code that corresponds with the success or error state.
+     *
+     * @param code    the integer code that corresponds with the success or error state.
      * @param message a more detailed textual version of the code provided previously.
      */
     public LogoutResponse(int code, String message) {
         responseCode = code;
         this.message = message;
+    }
+
+    public int getStatusCode() {
+        return responseCode;
     }
 }

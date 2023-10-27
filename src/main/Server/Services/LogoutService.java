@@ -42,12 +42,13 @@ public class LogoutService {
         String username = r.getUsername();
         AuthData t = tokens.findToken(username);
         if (t == null) {
-            return new LogoutResponse(401, "Error: Unauthorized");
+            return new LogoutResponse(401, "Error: Unauthorized. Related User not found");
         }
         if (t.getAuthToken().equals(token)) {
-            return new LogoutResponse(200, "");
+            tokens.remove(tokens.findToken(username));
+            return new LogoutResponse(200, null);
         } else {
-            return new LogoutResponse(500, "Error: invalid credentials.");
+            return new LogoutResponse(401, "Error: invalid credentials.");
         }
     }
 }

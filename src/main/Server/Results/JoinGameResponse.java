@@ -35,11 +35,16 @@ public class JoinGameResponse {
 
     /**
      * creates a new response for other classes.
+     *
      * @param code    response code. See static variables for options.
      * @param message More detailed message, if neccesary.
      */
     public JoinGameResponse(int code, String message) {
         responseCode = code;
         this.message = message;
+    }
+
+    public int getstatcode() {
+        return responseCode;
     }
 }

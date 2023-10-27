@@ -32,8 +32,8 @@ public class Game {
     /**
      * creates a new "game" with unique ID and no players.
      */
-    public Game() {
-        gameID = generateUniqueGameID();
+    public Game(int id) {
+        gameID = id;
         blackUsername = null;
         whiteUsername = null;
         gameName = ""; // when and where would this be used? Confused. for now is blank. FIXME
@@ -93,12 +93,5 @@ public class Game {
         this.gameName = gameName;
     }
 
-    /**
-     * generates a new game ID that is not repeated anywhere else.
-     *
-     * @return a new, unique and never used before ID. Will likely be done inside the database for better handling.
-     */
-    public static int generateUniqueGameID() {
-        return 0; //FIXME when have access to database, use to find ID that has not been used yet.
-    }
+
 }
