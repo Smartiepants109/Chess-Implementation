@@ -3,7 +3,7 @@ package Server.Services;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Models.AuthToken;
+import Server.Models.AuthData;
 import Server.Requests.LogoutRequest;
 import Server.Results.LogoutResponse;
 import dataAccess.DataAccessException;
@@ -40,7 +40,7 @@ public class LogoutService {
     public LogoutResponse logout(LogoutRequest r) throws DataAccessException {
         String token = r.getToken();
         String username = r.getUsername();
-        AuthToken t = tokens.findToken(username);
+        AuthData t = tokens.findToken(username);
         if (t == null) {
             return new LogoutResponse(401, "Error: Unauthorized");
         }

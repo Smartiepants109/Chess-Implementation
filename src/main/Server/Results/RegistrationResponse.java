@@ -11,7 +11,7 @@ public class RegistrationResponse {
     /**
      * message containing more details about result.
      */
-    String responseMessage;
+    String message;
     /**
      * response code for a success.
      */
@@ -37,6 +37,6 @@ public class RegistrationResponse {
      */
     public RegistrationResponse(int code, String message) {
         responseCode = code;
-        responseMessage = message;
+        this.message = message;
     }
 }

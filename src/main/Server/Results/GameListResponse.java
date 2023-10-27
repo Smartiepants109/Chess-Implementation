@@ -15,7 +15,7 @@ public class GameListResponse {
     /**
      * String containing more return information than the response code..
      */
-    Set<Game> responseMessage;
+    Set<Game> message;
     /**
      * code for when a request is carried out successfully
      */
@@ -38,6 +38,6 @@ public class GameListResponse {
      */
     public GameListResponse(int code, Set<Game> message) {
         responseCode = code;
-        responseMessage = message;
+        this.message = message;
     }
 }

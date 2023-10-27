@@ -4,7 +4,7 @@ package Server.Models;
 /**
  * Data container with a username and a password.
  */
-public class AuthToken {
+public class AuthData {
     /**
      * String field containing username of user.
      */
@@ -20,7 +20,7 @@ public class AuthToken {
      * @param uName Username of owner of token.
      * @param Token Security token.
      */
-    public AuthToken(String uName, String Token) {
+    public AuthData(String uName, String Token) {
         this.authToken = Token;
         this.username = uName;
     }

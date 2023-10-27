@@ -1,6 +1,6 @@
 package Server.Requests;
 
-import Server.Models.AuthToken;
+import Server.Models.AuthData;
 
 /**
  * A data container that is passed to the LoginService to be parsed into information.
@@ -34,7 +34,7 @@ public class GameListRequest {
         return username;
     }
 
-    public AuthToken getToken() {
-        return new AuthToken(username, password);
+    public AuthData getToken() {
+        return new AuthData(username, password);
     }
 }

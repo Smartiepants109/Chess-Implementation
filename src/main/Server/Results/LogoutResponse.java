@@ -11,7 +11,7 @@ public class LogoutResponse {
     /**
      * String containing more return information than the response code..
      */
-    String responseMessage;
+    String message;
     /**
      * code for when a request is carried out successfully
      */
@@ -32,6 +32,6 @@ public class LogoutResponse {
      */
     public LogoutResponse(int code, String message) {
         responseCode = code;
-        responseMessage = message;
+        this.message = message;
     }
 }

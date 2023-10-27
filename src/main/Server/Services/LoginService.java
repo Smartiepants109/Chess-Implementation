@@ -2,7 +2,7 @@ package Server.Services;
 
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.UserDAO;
-import Server.Models.AuthToken;
+import Server.Models.AuthData;
 import Server.Models.User;
 import Server.Requests.LoginRequest;
 import Server.Results.LoginResponse;
@@ -43,12 +43,12 @@ public class LoginService {
         username = r.getUsername();
         password = r.getPassword();
         if (u == null) {
-            return new LoginResponse(500, "Error: User does not exist. Try registering them first.");
+            return new LoginResponse(401, "Error: unauthorized");
         }
         if (u.getPw().equals(r.getPassword())) {
-            AuthToken authToken = new AuthToken(username, tokens.generateNewToken());
-            tokens.insertToken(authToken);
-            return new LoginResponse(200, "{\"username\":\"" + username + "\", \"authToken\":\"" + authToken.toString() + "\"}");
+            AuthData authData = new AuthData(username, tokens.generateNewToken());
+            tokens.insertToken(authData);
+            return new LoginResponse(200, username, authData.getAuthToken());
         } else {
             return new LoginResponse(401, "Error: unauthorized");
         }

@@ -3,7 +3,7 @@ package Server;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Models.AuthToken;
+import Server.Models.AuthData;
 import Server.Requests.*;
 import Server.Results.*;
 import Server.Services.*;
@@ -46,7 +46,7 @@ public class Server {
     }
 
     private Object joinGameHandler(Request request, Response response) throws DataAccessException {
-        AuthToken authToken = new AuthToken(request.params(":username"), request.params("password"));
+        AuthData authData = new AuthData(request.params(":username"), request.params("password"));
         ChessGame.TeamColor color;
         if (request.params(":playerColor").equals("WHITE")) {
             color = ChessGame.TeamColor.WHITE;
@@ -57,7 +57,7 @@ public class Server {
                 throw new DataAccessException("should not attempt to connect to a game as NULL player.");
             }
         }
-        JoinGameRequest joinGameRequest = new JoinGameRequest(Integer.parseInt(request.params(":gameID")), authToken, color);
+        JoinGameRequest joinGameRequest = new JoinGameRequest(Integer.parseInt(request.params(":gameID")), authData, color);
         JoinGameService ls = new JoinGameService(users, games, tokens);
         JoinGameResponse lr = ls.joinGame(joinGameRequest);
         return gson.toJson(lr);
@@ -78,7 +78,8 @@ public class Server {
     }
 
     private Object listGameHandler(Request request, Response response) throws DataAccessException {
-        GameListRequest gameListRequest = new GameListRequest(request.params(":username"), request.params(":password"));
+        AuthData token = gson.fromJson(getAuthToken(request), AuthData.class);
+        GameListRequest gameListRequest = new GameListRequest(token.getUsername(), token.getAuthToken());
         GameListService ls = new GameListService(users, games, tokens);
         GameListResponse lr = ls.listGames(gameListRequest);
         return gson.toJson(lr);
@@ -97,7 +98,8 @@ public class Server {
     }
 
     private Object logoutHandler(Request req, Response res) throws DataAccessException {
-        LogoutRequest logoutRequest = new LogoutRequest(req.params(":username"), req.params(":password"));
+        AuthData token = gson.fromJson(getAuthToken(req), AuthData.class);
+        LogoutRequest logoutRequest = new LogoutRequest(token.getUsername(), token.getAuthToken());
         LogoutService ls = new LogoutService(users, games, tokens);
         LogoutResponse lr = ls.logout(logoutRequest);
         return gson.toJson(lr);

@@ -11,7 +11,7 @@ public class CreateGameResponse {
     /**
      * Message that is alongside the code.
      */
-    String responseMessage;
+    String message;
     /**
      * Success. Not much more to say.
      */
@@ -38,6 +38,6 @@ public class CreateGameResponse {
      */
     public CreateGameResponse(int code, String message) {
         responseCode = code;
-        responseMessage = message;
+        this.message = message;
     }
 }

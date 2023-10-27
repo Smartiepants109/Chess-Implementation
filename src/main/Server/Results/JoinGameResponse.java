@@ -11,7 +11,7 @@ public class JoinGameResponse {
     /**
      * Message that is alongside the code.
      */
-    String responseMessage;
+    String message;
     /**
      * Success. Not much more to say.
      */
@@ -40,6 +40,6 @@ public class JoinGameResponse {
      */
     public JoinGameResponse(int code, String message) {
         responseCode = code;
-        responseMessage = message;
+        this.message = message;
     }
 }

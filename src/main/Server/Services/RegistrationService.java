@@ -2,7 +2,7 @@ package Server.Services;
 
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.UserDAO;
-import Server.Models.AuthToken;
+import Server.Models.AuthData;
 import Server.Models.User;
 import Server.Requests.RegistrationRequest;
 import Server.Results.RegistrationResponse;
@@ -45,9 +45,9 @@ public class RegistrationService {
         if (username != null && password != null && email != null) {
             if (users.findToken(username) == null) {
                 if (users.insertUser(new User(username, password, email))) {
-                    AuthToken authToken = new AuthToken(username, tokens.generateNewToken());
-                    tokens.insertToken(authToken);
-                    return new RegistrationResponse(200, new Gson().toJson(authToken));
+                    AuthData authData = new AuthData(username, tokens.generateNewToken());
+                    tokens.insertToken(authData);
+                    return new RegistrationResponse(200, new Gson().toJson(authData));
                 } else {
                     throw new DataAccessException("Somehow, Palpati- I mean, this failed.");
                 }
