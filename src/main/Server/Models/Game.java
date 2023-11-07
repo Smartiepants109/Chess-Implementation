@@ -40,6 +40,14 @@ public class Game {
         game = new ChessGameImp();
     }
 
+    public Game(int gameID, String gameName, String wU, String bU, ChessGame chessGame) {
+        this.gameName = gameName;
+        this.gameID = gameID;
+        this.whiteUsername = wU;
+        this.blackUsername = bU;
+        this.game = chessGame;
+    }
+
     public String getBlackUsername() {
         return blackUsername;
     }

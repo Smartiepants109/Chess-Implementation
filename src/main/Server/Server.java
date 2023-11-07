@@ -10,17 +10,20 @@ import Server.Services.*;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 
 public class Server {
-    AuthDAO tokens = new AuthDAO();
-    GameDAO games = new GameDAO();
-    UserDAO users = new UserDAO();
+    Database db = new Database();
+    AuthDAO tokens = new AuthDAO(db);
+    GameDAO games = new GameDAO(db);
+    UserDAO users = new UserDAO(db);
     Gson gson = new Gson();
 
     public static void main(String[] args) {
@@ -30,6 +33,9 @@ public class Server {
     private void run() {
         // Specify the port you want the server to listen on
         Spark.port(8080);
+        //check if database exists. If not, create it.
+        configureDB();
+
 
         // Register a directory for hosting static files
         Spark.externalStaticFileLocation("web");
@@ -43,6 +49,50 @@ public class Server {
         Spark.put("/game", this::joinGameHandler);
         Spark.delete("db", this::clearDBHandler);
 
+    }
+
+    private void configureDB() {
+        try (var conn = db.getConnection()) {
+            var createAuthTable = """
+                    CREATE TABLE IF NOT EXISTS auth (
+                    username VARCHAR(255) NOT NULL,
+                    authToken VARCHAR(255) NOT NULL,
+                    PRIMARY KEY (authToken), 
+                    INDEX (username)
+                    )""";
+            var createGameTable = """
+                    CREATE TABLE IF NOT EXISTS games (
+                    gameID INT NOT NULL,
+                    gameName VARCHAR(255),
+                    whiteUsername VARCHAR(255),
+                    blackUsername VARCHAR(255),
+                    game TEXT,
+                    PRIMARY KEY (gameID),
+                    INDEX (gameName)
+                    )""";
+            var createUserTable = """
+                    CREATE TABLE IF NOT EXISTS users (
+                    username VARCHAR(255) NOT NULL,
+                    pw VARCHAR(255) NOT NULL,
+                    email VARCHAR(255) NOT NULL,
+                    PRIMARY KEY (username), 
+                    INDEX (email)
+                    )""";
+            try (var authStatement = conn.prepareStatement(createAuthTable)) {
+                authStatement.executeUpdate();
+            }
+            try (var userStatement = conn.prepareStatement(createUserTable)) {
+                userStatement.executeUpdate();
+            }
+            try (var gameStatement = conn.prepareStatement(createGameTable)) {
+                gameStatement.executeUpdate();
+            }
+            db.returnConnection(conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Object joinGameHandler(Request request, Response response) throws DataAccessException {

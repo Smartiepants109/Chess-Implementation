@@ -5,41 +5,10 @@ import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
 import Server.Models.AuthData;
 import Server.Models.Game;
-import Server.Models.User;
 import Server.Requests.CreateGameRequest;
 import Server.Results.CreateGameResponse;
 import dataAccess.DataAccessException;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class CreateUnitTests {
-    @Test
-    public void worksTest() throws DataAccessException {
-        UserDAO users = new UserDAO();
-        GameDAO games = new GameDAO();
-        AuthDAO tokens = new AuthDAO();
-        users.insertUser(new User("user", "pass", "email"));
-        tokens.insertToken(new AuthData("user", "e"));
-        CreateGameService cs = new CreateGameService(users, games, tokens);
-        assertEquals(0, cs.games.findall().size());
-        cs.createGame(new CreateGameRequest("newgame", "user", "e"));
-        assertEquals(1, cs.games.findall().size());
-    }
-    @Test
-    public void failsTest() throws DataAccessException{
-        UserDAO users = new UserDAO();
-        GameDAO games = new GameDAO();
-        AuthDAO tokens = new AuthDAO();
-        users.insertUser(new User("user", "pass", "email"));
-        tokens.insertToken(new AuthData("user", "e"));
-        CreateGameService cs = new CreateGameService(users, games, tokens);
-        assertEquals(0, cs.games.findall().size());
-        cs.createGame(new CreateGameRequest("newgame", "user", "f"));
-        assertEquals(0, cs.games.findall().size());
-        //fails to add with false authToken.
-    }
-}
 
 /**
  * Service. As named.

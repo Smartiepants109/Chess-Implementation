@@ -2,8 +2,9 @@ package Server.DataAccess;
 
 import Server.Models.AuthData;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
 
-import java.util.HashSet;
+import java.sql.SQLException;
 import java.util.Random;
 import java.util.Set;
 
@@ -15,12 +16,13 @@ public class AuthDAO {
      * current database. Will be updated later.
      */
     Set<AuthData> tokens;
+    Database db;
 
     /**
      * generates a new Data Access Object.
      */
-    public AuthDAO() {
-        tokens = new HashSet<>();
+    public AuthDAO(Database db) {
+        this.db = db;
     }
 
     /**
@@ -31,7 +33,16 @@ public class AuthDAO {
      * @throws DataAccessException if the database was unable to be accessed.
      */
     public boolean insertToken(AuthData token) throws DataAccessException {
-        return tokens.add(token);
+        try (var conn = db.getConnection()) {
+            var preparedStatement = conn.prepareStatement("INSERT INTO auth (username, authToken) VALUES (?,?)");
+            preparedStatement.setString(1, token.getUsername());
+            preparedStatement.setString(2, token.getAuthToken());
+            var rs = preparedStatement.executeUpdate();
+            db.returnConnection(conn);
+            return !(rs == 0);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -42,25 +53,62 @@ public class AuthDAO {
      * @throws DataAccessException if the database itself is unable to be accessed.
      */
     public AuthData findToken(String username) throws DataAccessException {
-        for (AuthData a : tokens) {
+        try (var conn = db.getConnection()) {
+            var preparedStatement = conn.prepareStatement("SELECT authToken FROM auth WHERE username=?");
+            preparedStatement.setString(1, username);
+            var rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                String token = rs.getString("authToken");
+                db.returnConnection(conn);
+                return new AuthData(username, token);
+            } else {
+                db.returnConnection(conn);
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        /*for (AuthData a : tokens) {
             if (a.getUsername().equals(username)) {
                 return a;
             }
         }
-        return null;
+        return null;*/
     }
 
+    /*
     public Set<AuthData> findAll() throws DataAccessException {
         return tokens;
     }
-
+*/
     public boolean remove(AuthData token) throws DataAccessException {
-        return tokens.remove(token);
+        try (var conn = db.getConnection()) {
+            var preparedStatement = conn.prepareStatement("DELETE FROM auth WHERE username=? AND authToken=?");
+            preparedStatement.setString(1, token.getUsername());
+            preparedStatement.setString(2, token.getAuthToken());
+            if (preparedStatement.executeUpdate() > 0) {
+                db.returnConnection(conn);
+                return true;
+            } else {
+                db.returnConnection(conn);
+                return false;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean clear() throws DataAccessException {
-        tokens = new HashSet<>();
-        return true;
+        try (var conn = db.getConnection()) {
+            var preparedStatement = conn.prepareStatement("TRUNCATE auth");
+            preparedStatement.executeUpdate();
+            db.returnConnection(conn);
+            return true;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -68,15 +116,10 @@ public class AuthDAO {
         String sb = "";
         boolean doUntilFalse = true;
         while (doUntilFalse) {
-            doUntilFalse = false;
             sb = getRandomString();
-
-            for (AuthData t : tokens) {
-                if (t.getAuthToken().equals(sb)) {
-                    doUntilFalse = true;
-                }
+            if (findUsernameFromToken(sb.toString()) == null) {
+                doUntilFalse = false;
             }
-
         }
         return sb.toString();
     }
@@ -108,11 +151,30 @@ public class AuthDAO {
     }
 
     public String findUsernameFromToken(String token) {
-        for (AuthData a : tokens) {
+        try (var conn = db.getConnection()) {
+            var preparedStatement = conn.prepareStatement("SELECT username FROM auth WHERE authToken=?");
+            preparedStatement.setString(1, token);
+            var rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                String output = rs.getString("username");
+                db.returnConnection(conn);
+                return output;
+            } else {
+                db.returnConnection(conn);
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        /*for (AuthData a : tokens) {
             if (a.getAuthToken().equals(token)) {
                 return a.getUsername();
             }
         }
-        return null;
+        return null;*/
     }
 }

@@ -2,9 +2,9 @@ package Server.DataAccess;
 
 import Server.Models.User;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.sql.SQLException;
 
 /**
  * Allows a user to interact with the database of users.
@@ -13,13 +13,13 @@ public class UserDAO {
     /**
      * placeholder for database.
      */
-    Set<User> users;
+    Database db;
 
     /**
      * creates the database access object.
      */
-    public UserDAO() {
-        users = new HashSet<>();
+    public UserDAO(Database db) {
+        this.db = db;
     }
 
     /**
@@ -30,7 +30,17 @@ public class UserDAO {
      * @throws DataAccessException if the database is unable to be accessed.
      */
     public boolean insertUser(User user) throws DataAccessException {
-        return users.add(user);
+        try (var conn = db.getConnection()) {
+            var preparedStatement = conn.prepareStatement("INSERT INTO users (username, pw, email) VALUES (?,?,?)");
+            preparedStatement.setString(1, user.getUsername());
+            preparedStatement.setString(2, user.getPw());
+            preparedStatement.setString(3, user.getEmail());
+            var rs = preparedStatement.executeUpdate();
+            db.returnConnection(conn);
+            return !(rs == 0);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -41,15 +51,33 @@ public class UserDAO {
      * @throws DataAccessException when the database is unable to be accessed.
      */
     public User findToken(String username) throws DataAccessException {//username? Email? Find out which.
-        for (User u : users) {
-            if (u.getUsername().equals(username)) {
-                return u;
+        try (var conn = db.getConnection()) {
+            var preparedStatement = conn.prepareStatement("SELECT pw, email FROM users WHERE username=?");
+            preparedStatement.setString(1, username);
+            var rs = preparedStatement.executeQuery();
+            if (rs.next()) {
+                String pw = rs.getString("pw");
+                String email = rs.getString("email");
+                db.returnConnection(conn);
+                return new User(username, pw, email);
+            } else {
+                db.returnConnection(conn);
+                return null;
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     public void clear() {
-        users = new HashSet<>();
+        try (var conn = db.getConnection()) {
+            var preparedStatement = conn.prepareStatement("TRUNCATE users");
+            preparedStatement.executeUpdate();
+            db.returnConnection(conn);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
