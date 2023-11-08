@@ -3,12 +3,53 @@ package Server.Services;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
+import Server.Models.AuthData;
 import Server.Models.Game;
+import Server.Models.User;
 import Server.Requests.JoinGameRequest;
 import Server.Results.JoinGameResponse;
 import chess.ChessGame;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class JoinUnitTests {
+    Database db = new Database();
+    @Test
+    public void worksTest() throws DataAccessException {
+        UserDAO users = new UserDAO(db);
+        GameDAO games = new GameDAO(db);
+        AuthDAO tokens = new AuthDAO(db);
+        users.clear();
+        games.clear();
+        tokens.clear();
+        games.insertGame(new Game(1));
+        users.insertUser(new User("user", "pass", "email"));
+        tokens.insertToken(new AuthData("user", "e"));
+        JoinGameService cs = new JoinGameService(users, games, tokens);
+        JoinGameRequest jgrq = new JoinGameRequest(1, new AuthData("user", "e"), ChessGame.TeamColor.BLACK);
+        JoinGameResponse glr = cs.joinGame(jgrq);
+        assertEquals(200, glr.getstatcode());
+    }
+    @Test
+    public void failsTest() throws DataAccessException {
+        UserDAO users = new UserDAO(db);
+        GameDAO games = new GameDAO(db);
+        AuthDAO tokens = new AuthDAO(db);
+        users.clear();
+        games.clear();
+        tokens.clear();
+        games.insertGame(new Game(1));
+        users.insertUser(new User("user", "pass", "email"));
+        tokens.insertToken(new AuthData("user", "e"));
+        JoinGameService cs = new JoinGameService(users, games, tokens);
+        JoinGameRequest jgrq = new JoinGameRequest(1, new AuthData("user", "f"), ChessGame.TeamColor.BLACK);
+        JoinGameResponse glr = cs.joinGame(jgrq);
+        assertEquals(401, glr.getstatcode());
+    }
+}
 
 /**
  * Class to handle joining games on the server.

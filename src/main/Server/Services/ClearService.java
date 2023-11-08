@@ -3,10 +3,37 @@ package Server.Services;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
+import Server.Models.AuthData;
+import Server.Models.Game;
+import Server.Models.User;
 import Server.Requests.ClearRequest;
 import Server.Results.ClearResponse;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+class UnitTests {
+    @Test
+    public void worksTest() throws DataAccessException {
+        Database db = new Database();
+        UserDAO users = new UserDAO(db);
+        GameDAO games = new GameDAO(db);
+        AuthDAO tokens = new AuthDAO(db);
+        users.clear();
+        games.clear();
+        tokens.clear();
+        users.insertUser(new User("user", "pass", "email"));
+        games.insertGame(new Game(1));
+        tokens.insertToken(new AuthData("user", "e"));
+        ClearService cs = new ClearService(users, games, tokens);
+        assertNotNull(users.findToken("user"));
+        cs.clear(new ClearRequest());
+        assertNull(cs.users.findToken("user"));
+    }
+}
 
 /**
  * Service in charge of logging you into your account.

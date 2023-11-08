@@ -7,8 +7,38 @@ import Server.Models.User;
 import Server.Requests.RegistrationRequest;
 import Server.Results.RegistrationResponse;
 import dataAccess.DataAccessException;
+import dataAccess.Database;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+class RegiUnitTests {
+    Database d = new Database();
+
+    @Test
+    public void worksTest() throws DataAccessException {
+        UserDAO users = new UserDAO(d);
+        AuthDAO tokens = new AuthDAO(d);
+        users.clear();
+        tokens.clear();
+        RegistrationService rs = new RegistrationService(users, tokens);
+        RegistrationResponse rr = rs.register(new RegistrationRequest("user", "pw", "email"));
+        assertEquals(200, rr.getStatusCode());
+    }
+
+    @Test
+    public void failsTest() throws DataAccessException {
+        UserDAO users = new UserDAO(d);
+        AuthDAO tokens = new AuthDAO(d);
+        users.clear();
+        tokens.clear();
+        RegistrationService rs = new RegistrationService(users, tokens);
+        RegistrationResponse rr = rs.register(new RegistrationRequest("user", "pw", "email"));
+        rr = rs.register(new RegistrationRequest("user", "pw", "email"));
+        //attempts to register twice. bad.
+        assertEquals(403, rr.getStatusCode());
+    }
+}
 
 
 /**
