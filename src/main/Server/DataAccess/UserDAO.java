@@ -3,8 +3,83 @@ package Server.DataAccess;
 import Server.Models.User;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class UserUnitTests {
+    @Test
+    public void clearWorksTest() throws DataAccessException {
+        Database db = new Database();
+        UserDAO users = new UserDAO(db);
+        users.clear();
+        users.insertUser(new User("user", "pw", "em"));
+        assertEquals(1, getSizeOfUsers(db));
+        users.clear();
+        assertEquals(0, getSizeOfUsers(db));
+    }
+
+    private int getSizeOfUsers(Database db) throws DataAccessException {
+        try (var conn = db.getConnection()) {
+            var qury = conn.prepareStatement("""
+                                    
+                        SELECT COUNT(*) FROM users
+                    """);
+            var rs = qury.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DataAccessException("DB error");
+        }
+    }
+
+    @Test
+    public void insertWorksTest() throws DataAccessException {
+        Database db = new Database();
+        UserDAO users = new UserDAO(db);
+        users.clear();
+        assertNull(users.findToken("u"));
+        users.insertUser(new User("u", "p", "e"));
+        assertNotNull(users.findToken("u"));
+    }
+
+    @Test
+    public void insertFailsTest() throws DataAccessException {
+        Database db = new Database();
+        UserDAO users = new UserDAO(db);
+        assertNull(users.findToken("u"));
+        users.insertUser(new User("u", "p", "e"));
+        boolean b = false;
+        try {
+            assertFalse(users.insertUser(new User("u", "p", "e")));
+        } catch (Exception e) {
+            b = true;
+        }
+        assertTrue(b);
+    }
+
+    @Test
+    public void findSuccTest() throws DataAccessException {
+        Database db = new Database();
+        UserDAO users = new UserDAO(db);
+        users.clear();
+        users.insertUser(new User("u", "p", "e"));
+        assertNotNull(users.findToken("u"));
+    }
+
+    @Test
+    public void findFailTest() throws DataAccessException {
+        Database db = new Database();
+        UserDAO users = new UserDAO(db);
+        users.clear();
+        assertNull(users.findToken("u"));
+    }
+}
+
 
 /**
  * Allows a user to interact with the database of users.
@@ -36,10 +111,10 @@ public class UserDAO {
             preparedStatement.setString(2, user.getPw());
             preparedStatement.setString(3, user.getEmail());
             var rs = preparedStatement.executeUpdate();
-            db.returnConnection(conn);
             return !(rs == 0);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
     }
 
@@ -58,26 +133,23 @@ public class UserDAO {
             if (rs.next()) {
                 String pw = rs.getString("pw");
                 String email = rs.getString("email");
-                db.returnConnection(conn);
                 return new User(username, pw, email);
             } else {
-                db.returnConnection(conn);
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         try (var conn = db.getConnection()) {
-            var preparedStatement = conn.prepareStatement("TRUNCATE users");
+            var preparedStatement = conn.prepareStatement("TRUNCATE TABLE users");
             preparedStatement.executeUpdate();
-            db.returnConnection(conn);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
     }
 }

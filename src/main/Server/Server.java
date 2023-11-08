@@ -34,7 +34,12 @@ public class Server {
         // Specify the port you want the server to listen on
         Spark.port(8080);
         //check if database exists. If not, create it.
-        configureDB();
+        try {
+            configureDB();
+        } catch (DataAccessException e) {
+            System.out.println("this shouldn't be happening. fail on startup.");
+            throw new RuntimeException();
+        }
 
 
         // Register a directory for hosting static files
@@ -51,7 +56,7 @@ public class Server {
 
     }
 
-    private void configureDB() {
+    private void configureDB() throws DataAccessException {
         try (var conn = db.getConnection()) {
             var createAuthTable = """
                     CREATE TABLE IF NOT EXISTS auth (
@@ -87,12 +92,11 @@ public class Server {
             try (var gameStatement = conn.prepareStatement(createGameTable)) {
                 gameStatement.executeUpdate();
             }
-            db.returnConnection(conn);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
+
     }
 
     private Object joinGameHandler(Request request, Response response) throws DataAccessException {
@@ -117,7 +121,7 @@ public class Server {
         return gson.toJson(lr);
     }
 
-    private AuthData getAuthData(Request request) {
+    private AuthData getAuthData(Request request) throws DataAccessException {
         String token = getAuthToken(request);
         String user = tokens.findUsernameFromToken(token);
         return new AuthData(user, token);

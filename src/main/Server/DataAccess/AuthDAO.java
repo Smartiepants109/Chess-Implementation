@@ -3,10 +3,121 @@ package Server.DataAccess;
 import Server.Models.AuthData;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.Random;
 import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class AuthUnitTests {
+    @Test
+    public void clearWorksTest() throws DataAccessException {
+        Database db = new Database();
+        AuthDAO auths = new AuthDAO(db);
+        auths.clear();
+        auths.insertToken(new AuthData("user", "totallyRealAuthData"));
+        assertEquals(1, getSizeOfAuth(db));
+        auths.clear();
+        assertEquals(0, getSizeOfAuth(db));
+    }
+
+    private int getSizeOfAuth(Database db) throws DataAccessException {
+        try (var conn = db.getConnection()) {
+            var qury = conn.prepareStatement("""
+                                    
+                        SELECT COUNT(*) FROM auth
+                    """);
+            var rs = qury.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DataAccessException("DB error");
+        }
+    }
+
+    @Test
+    public void insertWorksTest() throws DataAccessException {
+        Database db = new Database();
+        AuthDAO auths = new AuthDAO(db);
+        assertNull(auths.findToken("u"));
+        auths.insertToken(new AuthData("u", "p"));
+        assertNotNull(auths.findToken("u"));
+    }
+
+    @Test
+    public void insertFailsTest() throws DataAccessException {
+        Database db = new Database();
+        AuthDAO auth = new AuthDAO(db);
+        auth.clear();
+        assertNull(auth.findToken("u"));
+        auth.insertToken(new AuthData("u", "p"));
+        boolean b = false;
+        try {
+            auth.insertToken(new AuthData("u", "p"));
+        } catch (Exception e) {
+            //supposed to throw error.
+            b = true;
+        }
+        assertTrue(b);
+    }
+
+    @Test
+    public void findSuccTest() throws DataAccessException {
+        Database db = new Database();
+        AuthDAO auths = new AuthDAO(db);
+        auths.clear();
+        auths.insertToken(new AuthData("u", "p"));
+        assertNotNull(auths.findToken("u"));
+    }
+
+    @Test
+    public void findFailTest() throws DataAccessException {
+        Database db = new Database();
+        AuthDAO auths = new AuthDAO(db);
+        auths.clear();
+        assertNull(auths.findToken("u"));
+    }
+
+    @Test
+    public void findUFTSuccTest() throws DataAccessException {
+        Database db = new Database();
+        AuthDAO auths = new AuthDAO(db);
+        auths.clear();
+        auths.insertToken(new AuthData("u", "p"));
+        assertNotNull(auths.findUsernameFromToken("p"));
+    }
+
+    @Test
+    public void findUFTFailTest() throws DataAccessException {
+        Database db = new Database();
+        AuthDAO auths = new AuthDAO(db);
+        auths.clear();
+        assertNull(auths.findUsernameFromToken("p"));
+    }
+
+    @Test
+    public void delSuccTest() throws DataAccessException {
+        Database db = new Database();
+        AuthDAO auths = new AuthDAO(db);
+        auths.clear();
+        auths.insertToken(new AuthData("u", "p"));
+        assertTrue(auths.remove(new AuthData("u", "p")));
+    }
+
+    @Test
+    public void delFailTest() throws DataAccessException {
+        Database db = new Database();
+        AuthDAO auths = new AuthDAO(db);
+        auths.clear();
+        assertFalse(auths.remove(new AuthData("u", "p")));
+
+    }
+}
+
 
 /**
  * DAO  for authentication tokens.
@@ -38,10 +149,10 @@ public class AuthDAO {
             preparedStatement.setString(1, token.getUsername());
             preparedStatement.setString(2, token.getAuthToken());
             var rs = preparedStatement.executeUpdate();
-            db.returnConnection(conn);
             return !(rs == 0);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
     }
 
@@ -59,14 +170,13 @@ public class AuthDAO {
             var rs = preparedStatement.executeQuery();
             if (rs.next()) {
                 String token = rs.getString("authToken");
-                db.returnConnection(conn);
                 return new AuthData(username, token);
             } else {
-                db.returnConnection(conn);
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
 
 
@@ -89,14 +199,13 @@ public class AuthDAO {
             preparedStatement.setString(1, token.getUsername());
             preparedStatement.setString(2, token.getAuthToken());
             if (preparedStatement.executeUpdate() > 0) {
-                db.returnConnection(conn);
                 return true;
             } else {
-                db.returnConnection(conn);
                 return false;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
     }
 
@@ -104,15 +213,15 @@ public class AuthDAO {
         try (var conn = db.getConnection()) {
             var preparedStatement = conn.prepareStatement("TRUNCATE auth");
             preparedStatement.executeUpdate();
-            db.returnConnection(conn);
             return true;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
     }
 
 
-    public String generateNewToken() {
+    public String generateNewToken() throws DataAccessException {
         String sb = "";
         boolean doUntilFalse = true;
         while (doUntilFalse) {
@@ -150,23 +259,20 @@ public class AuthDAO {
         return false;
     }
 
-    public String findUsernameFromToken(String token) {
+    public String findUsernameFromToken(String token) throws DataAccessException {
         try (var conn = db.getConnection()) {
             var preparedStatement = conn.prepareStatement("SELECT username FROM auth WHERE authToken=?");
             preparedStatement.setString(1, token);
             var rs = preparedStatement.executeQuery();
             if (rs.next()) {
                 String output = rs.getString("username");
-                db.returnConnection(conn);
                 return output;
             } else {
-                db.returnConnection(conn);
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
 
 

@@ -2,7 +2,7 @@ package Server.Results;
 
 import Server.Models.Game;
 
-import java.util.Set;
+import java.util.ArrayList;
 
 /**
  * Container for response information for specific attacks.
@@ -16,7 +16,7 @@ public class GameListResponse {
     /**
      * String containing more return information than the response code..
      */
-    Set<Game> games;
+    ArrayList<Game> games;
     /**
      * code for when a request is carried out successfully
      */
@@ -37,7 +37,7 @@ public class GameListResponse {
      * @param code  the integer code that corresponds with the success or error state.
      * @param games a more detailed textual version of the code provided previously.
      */
-    public GameListResponse(int code, Set<Game> games) {
+    public GameListResponse(int code, ArrayList<Game> games) {
         responseCode = code;
         this.games = games;
     }

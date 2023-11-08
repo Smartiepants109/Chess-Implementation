@@ -1,17 +1,118 @@
 package Server.DataAccess;
 
 import Server.Models.Game;
-import chess.ChessGame;
+import chess.ChessBoard;
+import chess.ChessPiece;
+import chessGame.ChessBoardImp;
 import chessGame.ChessGameImp;
+import chessGame.ChessPieceImp;
 import com.google.gson.*;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.sql.SQLException;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Random;
-import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class UnitTests {
+    @Test
+    public void clearWorksTest() throws DataAccessException {
+        Database db = new Database();
+        GameDAO games = new GameDAO(db);
+        games.clear();
+        games.insertGame(new Game(1));
+        assertEquals(1, getSizeOfGames(db));
+        games.clear();
+        assertEquals(0, getSizeOfGames(db));
+    }
+
+    private int getSizeOfGames(Database db) throws DataAccessException {
+        try (var conn = db.getConnection()) {
+            var qury = conn.prepareStatement("""            
+                        SELECT COUNT(1) FROM games
+                    """);
+            var rs = qury.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DataAccessException("DB error");
+        }
+    }
+
+    @Test
+    public void insertWorksTest() throws DataAccessException {
+        Database db = new Database();
+        GameDAO games = new GameDAO(db);
+        assertNull(games.findGame(2));
+        games.insertGame(new Game(2));
+        assertNotNull(games.findGame(2));
+    }
+
+    @Test
+    public void insertFailsTest() throws DataAccessException {
+        Database db = new Database();
+        GameDAO games = new GameDAO(db);
+        games.clear();
+        try {
+            games.insertGame(new Game(1));
+            assertFalse(games.insertGame(new Game(1)));
+        } catch (Exception e) {
+            //it is supposed to return an error. It isn't supposed to happen. Right?
+        }
+    }
+
+    @Test
+    public void findSuccTest() throws DataAccessException {
+        Database db = new Database();
+        GameDAO games = new GameDAO(db);
+        games.clear();
+        games.insertGame(new Game(1));
+        assertNotNull(games.findGame(1));
+    }
+
+    @Test
+    public void findFailTest() throws DataAccessException {
+        Database db = new Database();
+        GameDAO games = new GameDAO(db);
+        games.clear();
+        assertNull(games.findGame(1));
+    }
+
+    @Test
+    public void finallSucTest() throws DataAccessException {
+        Database db = new Database();
+        GameDAO games = new GameDAO(db);
+        games.clear();
+        assertEquals(0, games.findall().size());
+        games.insertGame(new Game(1));
+        assertEquals(1, games.findall().size());
+    }
+
+    @Test
+    public void finallFalTest() throws DataAccessException {
+        Database db = new Database();
+        GameDAO games = new GameDAO(db);
+        games.clear();
+        assertEquals(0, games.findall().size());
+        boolean b = false;
+        games.insertGame(new Game(1));
+        try {
+            games.insertGame(new Game(1));
+        } catch (Exception e) {
+            //I know it errors. It is supposed to.
+            b = true;
+        }
+        assertTrue(b);
+        assertEquals(1, games.findall().size());
+    }
+}
+
 
 /**
  * Data access object for all Game models on the server.
@@ -22,15 +123,38 @@ public class GameDAO {
      */
     Database db;
 
-    class ChessAdapter implements JsonDeserializer<ChessGame> {
+    public boolean updateData(String varToChange, int gameID, String toChangeTo) throws DataAccessException {
+        try (var conn = db.getConnection()) {
+            var stmt = conn.prepareStatement("UPDATE games SET " + varToChange + " = ? WHERE gameID = ?");
+            stmt.setString(1, toChangeTo);
+            stmt.setInt(2, gameID);
+            var rs = stmt.executeUpdate();
+            return !(rs == 0);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
+        }
+    }
+
+
+    class BoardAdapter implements JsonDeserializer<ChessBoard> {
         @Override
-        public ChessGame deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-            return new Gson().fromJson(jsonElement, ChessGameImp.class);
+        public ChessBoard deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+            var builder = new GsonBuilder();
+            builder.registerTypeAdapter(ChessPiece.class, new PieceAdapter());
+            return new Gson().fromJson(jsonElement, ChessBoardImp.class);
+        }
+    }
+
+    class PieceAdapter implements JsonDeserializer<ChessPiece> {
+        @Override
+        public ChessPiece deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+            return new Gson().fromJson(jsonElement, ChessPieceImp.class);
         }
     }
 
     /**
-     * Opens the interface. FIXME will implement server instead of hashmap
+     * Opens the interface.
      */
     public GameDAO(Database database) {
         db = database;
@@ -52,10 +176,10 @@ public class GameDAO {
             preparedStatement.setString(4, game.getBlackUsername());
             preparedStatement.setString(5, new Gson().toJson(game.getGame()));
             var rs = preparedStatement.executeUpdate();
-            db.returnConnection(conn);
             return !(rs == 0);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
     }
 
@@ -76,58 +200,58 @@ public class GameDAO {
                 String gameName = rs.getString("gameName");
                 String bU = rs.getString("blackUsername");
                 String wU = rs.getString("whiteUsername");
-                db.returnConnection(conn);
-                var builder = new GsonBuilder();
-                builder.registerTypeAdapter(ChessGame.class, new ChessAdapter());
-
-                return new Game(gameID, gameName, wU, bU, builder.create().fromJson(game, ChessGame.class));
+                return DeserializeGame(gameID, gameName, wU, bU, game);
             } else {
-                db.returnConnection(conn);
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
     }
 
-    public void clear() {
+    private Game DeserializeGame(int gameID, String gameName, String wU, String bU, String game) {
+        var builder = new GsonBuilder();
+
+        builder.registerTypeAdapter(ChessBoard.class, new BoardAdapter());
+        builder.registerTypeAdapter(ChessPiece.class, new PieceAdapter());
+
+        return new Game(gameID, gameName, wU, bU, builder.create().fromJson(game, ChessGameImp.class));
+    }
+
+    public void clear() throws DataAccessException {
         try (var conn = db.getConnection()) {
-            var preparedStatement = conn.prepareStatement("TRUNCATE games");
+            var preparedStatement = conn.prepareStatement("TRUNCATE TABLE games");
             preparedStatement.executeUpdate();
-            db.returnConnection(conn);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
     }
 
-    public Set<Game> findall() {
+    public ArrayList<Game> findall() throws DataAccessException { //FIXME
         try (var conn = db.getConnection()) {
             var preparedStatement = conn.prepareStatement("SELECT gameID, game, gameName, whiteUsername, blackUsername FROM games");
             var rs = preparedStatement.executeQuery();
-            HashSet<Game> gameSet = new HashSet<>();
+            ArrayList<Game> gameSet = new ArrayList<>();
             while (rs.next()) {
                 String game = rs.getString("game");
                 String gameName = rs.getString("gameName");
                 String bU = rs.getString("blackUsername");
                 String wU = rs.getString("whiteUsername");
                 int gameID = rs.getInt("gameID");
-                db.returnConnection(conn);
-                var builder = new GsonBuilder();
-                builder.registerTypeAdapter(ChessGame.class, new ChessAdapter());
 
-                gameSet.add(new Game(gameID, gameName, wU, bU, builder.create().fromJson(game, ChessGame.class)));
+
+                gameSet.add(DeserializeGame(gameID, gameName, wU, bU, game));
             }
             return gameSet;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
         }
     }
 
-    public int generateUniqueID() {
+    public int generateUniqueID() throws DataAccessException {
         Random r = new Random();
         int result = 0;
         boolean canLeave = false;

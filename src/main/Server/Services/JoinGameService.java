@@ -10,7 +10,6 @@ import chess.ChessGame;
 import dataAccess.DataAccessException;
 
 
-
 /**
  * Class to handle joining games on the server.
  */
@@ -56,14 +55,17 @@ public class JoinGameService {
                 }
                 if (r.getColor().equals(ChessGame.TeamColor.WHITE)) {
                     if (g.getWhiteUsername() == null) {
-                        g.setUsernameW(r.getUserJoining().getUsername());
-                        return new JoinGameResponse(200, null);
+                        if (gamesOnServer.updateData("whiteUsername", g.getGameID(), r.getUserJoining().getUsername())) {
+                            return new JoinGameResponse(200, null);
+                        } else {
+                            return new JoinGameResponse(500, "Error. Whom even knows");
+                        }
                     } else {
                         return new JoinGameResponse(403, "Error: already taken");
                     }
                 } else {
                     if (g.getBlackUsername() == null) {
-                        g.setUsernameB(r.getUserJoining().getUsername());
+                        gamesOnServer.updateData("blackUsername", g.getGameID(), r.getUserJoining().getUsername());
                         return new JoinGameResponse(200, "");
                     } else {
                         return new JoinGameResponse(403, "Error: already taken");
