@@ -3,50 +3,10 @@ package Server.Services;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Models.AuthData;
-import Server.Models.User;
 import Server.Requests.GameListRequest;
 import Server.Results.GameListResponse;
 import dataAccess.DataAccessException;
-import dataAccess.Database;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-
-class ListUnitTests {
-    Database db = new Database();
-
-    @Test
-    public void worksTest() throws DataAccessException {
-        UserDAO users = new UserDAO(db);
-        GameDAO games = new GameDAO(db);
-        AuthDAO tokens = new AuthDAO(db);
-        users.clear();
-        games.clear();
-        tokens.clear();
-        users.insertUser(new User("user", "pass", "email"));
-        tokens.insertToken(new AuthData("user", "e"));
-        GameListService cs = new GameListService(users, games, tokens);
-        GameListResponse glr = cs.listGames(new GameListRequest("user", "e"));
-        assertEquals(200, glr.getCode());
-    }
-
-    @Test
-    public void failsTest() throws DataAccessException {
-        UserDAO users = new UserDAO(db);
-        GameDAO games = new GameDAO(db);
-        AuthDAO tokens = new AuthDAO(db);
-        users.clear();
-        games.clear();
-        tokens.clear();
-        users.insertUser(new User("user", "pass", "email"));
-        tokens.insertToken(new AuthData("user", "e"));
-        GameListService cs = new GameListService(users, games, tokens);
-        GameListResponse glr = cs.listGames(new GameListRequest("user", "f"));
-        assertNotEquals(200, glr.getCode());
-    }
-}
 
 
 /**

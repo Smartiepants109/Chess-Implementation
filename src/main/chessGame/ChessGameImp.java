@@ -150,10 +150,7 @@ public class ChessGameImp implements chess.ChessGame {
         if (moves.size() > 0) {
             return false; // redundancy. Just in case. I don't trust this project, lol.
         }
-        if (!checkHelper(teamColor, board)) {
-            return false;
-        }
-        return true;
+        return checkHelper(teamColor, board);
     }
 
     @Override
@@ -177,9 +174,7 @@ public class ChessGameImp implements chess.ChessGame {
             }
         }
         if (moves.size() == 0) {
-            if (!checkHelper(teamColor, board)) {
-                return true;
-            }
+            return !checkHelper(teamColor, board);
         }
         return false;
     }

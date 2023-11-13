@@ -7,39 +7,7 @@ import Server.Models.User;
 import Server.Requests.LoginRequest;
 import Server.Results.LoginResponse;
 import dataAccess.DataAccessException;
-import dataAccess.Database;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-
-class LoginUnitTests {
-    Database db = new Database();
-
-    @Test
-    public void worksTest() throws DataAccessException {
-        UserDAO users = new UserDAO(db);
-        AuthDAO tokens = new AuthDAO(db);
-        users.clear();
-        tokens.clear();
-        LoginService ls = new LoginService(users, tokens);
-        users.insertUser(new User("user", "pw", "em"));
-        LoginResponse lr = ls.login(new LoginRequest("user", "pw"));
-        assertEquals(200, lr.getResponseCode());
-    }
-
-    @Test
-    public void failsTest() throws DataAccessException {
-        UserDAO users = new UserDAO(db);
-        AuthDAO tokens = new AuthDAO(db);
-        users.clear();
-        tokens.clear();
-        LoginService ls = new LoginService(users, tokens);
-        users.insertUser(new User("user", "pw", "em"));
-        LoginResponse lr = ls.login(new LoginRequest("user", "lksadjflkajdshfgjershgljrshfd khdnochev hkjgerskjghnslfghlersi"));
-        assertNotEquals(200, lr.getResponseCode());
-    }
-}
 
 
 /**

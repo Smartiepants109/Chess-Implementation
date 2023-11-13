@@ -9,109 +9,12 @@ import chessGame.ChessPieceImp;
 import com.google.gson.*;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
-import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class UnitTests {
-    @Test
-    public void clearWorksTest() throws DataAccessException {
-        Database db = new Database();
-        GameDAO games = new GameDAO(db);
-        games.clear();
-        games.insertGame(new Game(1));
-        assertEquals(1, getSizeOfGames(db));
-        games.clear();
-        assertEquals(0, getSizeOfGames(db));
-    }
-
-    private int getSizeOfGames(Database db) throws DataAccessException {
-        try (var conn = db.getConnection()) {
-            var qury = conn.prepareStatement("""            
-                        SELECT COUNT(1) FROM games
-                    """);
-            var rs = qury.executeQuery();
-            rs.next();
-            return rs.getInt(1);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new DataAccessException("DB error");
-        }
-    }
-
-    @Test
-    public void insertWorksTest() throws DataAccessException {
-        Database db = new Database();
-        GameDAO games = new GameDAO(db);
-        assertNull(games.findGame(2));
-        games.insertGame(new Game(2));
-        assertNotNull(games.findGame(2));
-    }
-
-    @Test
-    public void insertFailsTest() throws DataAccessException {
-        Database db = new Database();
-        GameDAO games = new GameDAO(db);
-        games.clear();
-        try {
-            games.insertGame(new Game(1));
-            assertFalse(games.insertGame(new Game(1)));
-        } catch (Exception e) {
-            //it is supposed to return an error. It isn't supposed to happen. Right?
-        }
-    }
-
-    @Test
-    public void findSuccTest() throws DataAccessException {
-        Database db = new Database();
-        GameDAO games = new GameDAO(db);
-        games.clear();
-        games.insertGame(new Game(1));
-        assertNotNull(games.findGame(1));
-    }
-
-    @Test
-    public void findFailTest() throws DataAccessException {
-        Database db = new Database();
-        GameDAO games = new GameDAO(db);
-        games.clear();
-        assertNull(games.findGame(1));
-    }
-
-    @Test
-    public void finallSucTest() throws DataAccessException {
-        Database db = new Database();
-        GameDAO games = new GameDAO(db);
-        games.clear();
-        assertEquals(0, games.findall().size());
-        games.insertGame(new Game(1));
-        assertEquals(1, games.findall().size());
-    }
-
-    @Test
-    public void finallFalTest() throws DataAccessException {
-        Database db = new Database();
-        GameDAO games = new GameDAO(db);
-        games.clear();
-        assertEquals(0, games.findall().size());
-        boolean b = false;
-        games.insertGame(new Game(1));
-        try {
-            games.insertGame(new Game(1));
-        } catch (Exception e) {
-            //I know it errors. It is supposed to.
-            b = true;
-        }
-        assertTrue(b);
-        assertEquals(1, games.findall().size());
-    }
-}
 
 
 /**
@@ -264,6 +167,7 @@ public class GameDAO {
             for (Game t : findall()) {
                 if (t.getGameID() == result) {
                     canLeave = false;
+                    break;
                 }
             }
         }

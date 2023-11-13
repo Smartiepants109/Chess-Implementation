@@ -44,10 +44,7 @@ public class ChessPieceImp implements chess.ChessPiece {
     public ChessPieceImp(ChessGame.TeamColor pieceColor, PieceType type) {
         color = pieceColor;
         pieceType = type;
-        isError = false;
-        if (pieceType == PieceType.KING || pieceType == PieceType.ROOK || pieceType == PieceType.PAWN) {
-            isError = true; // isError is only an error indicator if the pieceType is a queen.
-        }
+        isError = pieceType == PieceType.KING || pieceType == PieceType.ROOK || pieceType == PieceType.PAWN; // isError is only an error indicator if the pieceType is a queen.
     }
 
 
