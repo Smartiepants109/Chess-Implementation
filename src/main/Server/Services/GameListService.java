@@ -3,8 +3,8 @@ package Server.Services;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Requests.GameListRequest;
-import Server.Results.GameListResponse;
+import Requests.GameListRequest;
+import Results.GameListResponse;
 import dataAccess.DataAccessException;
 
 

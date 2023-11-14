@@ -1,11 +1,11 @@
 package Server;
 
+import Models.AuthData;
+import Requests.*;
+import Results.*;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Models.AuthData;
-import Server.Requests.*;
-import Server.Results.*;
 import Server.Services.*;
 import chess.ChessGame;
 import com.google.gson.Gson;

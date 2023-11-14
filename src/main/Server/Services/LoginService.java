@@ -2,10 +2,10 @@ package Server.Services;
 
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.UserDAO;
-import Server.Models.AuthData;
-import Server.Models.User;
-import Server.Requests.LoginRequest;
-import Server.Results.LoginResponse;
+import Models.AuthData;
+import Models.User;
+import Requests.LoginRequest;
+import Results.LoginResponse;
 import dataAccess.DataAccessException;
 
 

@@ -3,8 +3,8 @@ package Server.Services;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Requests.ClearRequest;
-import Server.Results.ClearResponse;
+import Requests.ClearRequest;
+import Results.ClearResponse;
 import dataAccess.DataAccessException;
 
 

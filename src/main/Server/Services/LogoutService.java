@@ -3,15 +3,11 @@ package Server.Services;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Models.AuthData;
-import Server.Models.User;
-import Server.Requests.LogoutRequest;
-import Server.Results.LogoutResponse;
+import Models.AuthData;
+import Requests.LogoutRequest;
+import Results.LogoutResponse;
 import dataAccess.DataAccessException;
-import dataAccess.Database;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 

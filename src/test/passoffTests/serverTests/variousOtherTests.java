@@ -1,14 +1,14 @@
 package passoffTests.serverTests;
 
 
+import Models.AuthData;
+import Models.Game;
+import Models.User;
+import Requests.*;
+import Results.*;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Models.AuthData;
-import Server.Models.Game;
-import Server.Models.User;
-import Server.Requests.*;
-import Server.Results.*;
 import Server.Services.*;
 import chess.ChessGame;
 import dataAccess.DataAccessException;
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AuthUnitTests {
     @Test

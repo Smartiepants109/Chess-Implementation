@@ -1,6 +1,6 @@
 package Server.DataAccess;
 
-import Server.Models.User;
+import Models.User;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
 

@@ -3,10 +3,10 @@ package Server.Services;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Models.AuthData;
-import Server.Models.Game;
-import Server.Requests.CreateGameRequest;
-import Server.Results.CreateGameResponse;
+import Models.AuthData;
+import Models.Game;
+import Requests.CreateGameRequest;
+import Results.CreateGameResponse;
 import dataAccess.DataAccessException;
 
 

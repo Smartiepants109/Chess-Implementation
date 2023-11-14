@@ -3,17 +3,12 @@ package Server.Services;
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
-import Server.Models.AuthData;
-import Server.Models.Game;
-import Server.Models.User;
-import Server.Requests.JoinGameRequest;
-import Server.Results.JoinGameResponse;
+import Models.Game;
+import Requests.JoinGameRequest;
+import Results.JoinGameResponse;
 import chess.ChessGame;
 import dataAccess.DataAccessException;
-import dataAccess.Database;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /**

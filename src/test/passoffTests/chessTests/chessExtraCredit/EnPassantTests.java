@@ -17,11 +17,11 @@ import passoffTests.TestFactory;
  */
 public class EnPassantTests {
 
-    private ChessBoard chessBoard;
+    private ChessBoard ChessBoard;
 
     @BeforeEach
     public void setup() {
-        chessBoard = TestFactory.getNewBoard();
+        ChessBoard = TestFactory.getNewBoard();
     }
 
 
@@ -43,15 +43,15 @@ public class EnPassantTests {
         //white pawn
         ChessPiece pawn = TestFactory.getNewPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         ChessPosition position = TestFactory.getNewPosition(5, 2);
-        chessBoard.addPiece(position, pawn);
+        ChessBoard.addPiece(position, pawn);
 
         //black pawn that will double move
-        chessBoard.addPiece(TestFactory.getNewPosition(7, 3),
+        ChessBoard.addPiece(TestFactory.getNewPosition(7, 3),
                 TestFactory.getNewPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
 
         //set up game
         ChessGame game = TestFactory.getNewGame();
-        game.setBoard(chessBoard);
+        game.setBoard(ChessBoard);
         game.setTeamTurn(ChessGame.TeamColor.BLACK);
 
         //move black piece 2 spaces
@@ -106,15 +106,15 @@ public class EnPassantTests {
         //white pawn
         ChessPiece pawn = TestFactory.getNewPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         ChessPosition position = TestFactory.getNewPosition(5, 4);
-        chessBoard.addPiece(position, pawn);
+        ChessBoard.addPiece(position, pawn);
 
         //black pawn that will double move
-        chessBoard.addPiece(TestFactory.getNewPosition(7, 3),
+        ChessBoard.addPiece(TestFactory.getNewPosition(7, 3),
                 TestFactory.getNewPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
 
         //set up game
         ChessGame game = TestFactory.getNewGame();
-        game.setBoard(chessBoard);
+        game.setBoard(ChessBoard);
         game.setTeamTurn(ChessGame.TeamColor.BLACK);
 
         //move black piece 2 spaces
@@ -169,15 +169,15 @@ public class EnPassantTests {
         //black pawn
         ChessPiece pawn = TestFactory.getNewPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
         ChessPosition position = TestFactory.getNewPosition(4, 6);
-        chessBoard.addPiece(position, pawn);
+        ChessBoard.addPiece(position, pawn);
 
         //white pawn that will double move
-        chessBoard.addPiece(TestFactory.getNewPosition(2, 7),
+        ChessBoard.addPiece(TestFactory.getNewPosition(2, 7),
                 TestFactory.getNewPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
 
         //set up game
         ChessGame game = TestFactory.getNewGame();
-        game.setBoard(chessBoard);
+        game.setBoard(ChessBoard);
         game.setTeamTurn(ChessGame.TeamColor.WHITE);
 
         //move white piece 2 spaces
@@ -232,15 +232,15 @@ public class EnPassantTests {
         //Black pawn
         ChessPiece pawn = TestFactory.getNewPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
         ChessPosition position = TestFactory.getNewPosition(4, 8);
-        chessBoard.addPiece(position, pawn);
+        ChessBoard.addPiece(position, pawn);
 
         //white pawn that will double move
-        chessBoard.addPiece(TestFactory.getNewPosition(2, 7),
+        ChessBoard.addPiece(TestFactory.getNewPosition(2, 7),
                 TestFactory.getNewPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
 
         //set up game
         ChessGame game = TestFactory.getNewGame();
-        game.setBoard(chessBoard);
+        game.setBoard(ChessBoard);
         game.setTeamTurn(ChessGame.TeamColor.WHITE);
 
         //move white piece 2 spaces
@@ -295,21 +295,21 @@ public class EnPassantTests {
         //white pawn on board
         ChessPiece pawn = TestFactory.getNewPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
         ChessPosition position = TestFactory.getNewPosition(5, 2);
-        chessBoard.addPiece(position, pawn);
+        ChessBoard.addPiece(position, pawn);
 
         //black pawn that double moves
-        chessBoard.addPiece(TestFactory.getNewPosition(7, 3),
+        ChessBoard.addPiece(TestFactory.getNewPosition(7, 3),
                 TestFactory.getNewPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
 
         //extra pawns
-        chessBoard.addPiece(TestFactory.getNewPosition(3, 8),
+        ChessBoard.addPiece(TestFactory.getNewPosition(3, 8),
                 TestFactory.getNewPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
-        chessBoard.addPiece(TestFactory.getNewPosition(6, 8),
+        ChessBoard.addPiece(TestFactory.getNewPosition(6, 8),
                 TestFactory.getNewPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
 
         //set up game
         ChessGame game = TestFactory.getNewGame();
-        game.setBoard(chessBoard);
+        game.setBoard(ChessBoard);
         game.setTeamTurn(ChessGame.TeamColor.BLACK);
 
         //move black piece 2 spaces

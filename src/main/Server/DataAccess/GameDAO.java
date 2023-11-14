@@ -1,6 +1,6 @@
 package Server.DataAccess;
 
-import Server.Models.Game;
+import Models.Game;
 import chess.ChessBoard;
 import chess.ChessPiece;
 import chessGame.ChessBoardImp;

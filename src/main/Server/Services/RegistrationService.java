@@ -2,15 +2,11 @@ package Server.Services;
 
 import Server.DataAccess.AuthDAO;
 import Server.DataAccess.UserDAO;
-import Server.Models.AuthData;
-import Server.Models.User;
-import Server.Requests.RegistrationRequest;
-import Server.Results.RegistrationResponse;
+import Models.AuthData;
+import Models.User;
+import Requests.RegistrationRequest;
+import Results.RegistrationResponse;
 import dataAccess.DataAccessException;
-import dataAccess.Database;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 
