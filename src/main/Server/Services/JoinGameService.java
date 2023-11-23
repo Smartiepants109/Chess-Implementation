@@ -1,14 +1,13 @@
 package Server.Services;
 
-import Server.DataAccess.AuthDAO;
-import Server.DataAccess.GameDAO;
-import Server.DataAccess.UserDAO;
 import Models.Game;
 import Requests.JoinGameRequest;
 import Results.JoinGameResponse;
+import Server.DataAccess.AuthDAO;
+import Server.DataAccess.GameDAO;
+import Server.DataAccess.UserDAO;
 import chess.ChessGame;
 import dataAccess.DataAccessException;
-
 
 
 /**
@@ -52,12 +51,12 @@ public class JoinGameService {
             } else {
                 Game g = (gamesOnServer.findGame(r.getGameIdToJoin()));
                 if (r.getColor() == null) {
-                    return new JoinGameResponse(200, null);
+                    return new JoinGameResponse(200, g.getGame());
                 }
                 if (r.getColor().equals(ChessGame.TeamColor.WHITE)) {
                     if (g.getWhiteUsername() == null) {
                         if (gamesOnServer.updateData("whiteUsername", g.getGameID(), r.getUserJoining().getUsername())) {
-                            return new JoinGameResponse(200, null);
+                            return new JoinGameResponse(200, g.getGame());
                         } else {
                             return new JoinGameResponse(500, "Error. Whom even knows");
                         }
@@ -67,7 +66,7 @@ public class JoinGameService {
                 } else {
                     if (g.getBlackUsername() == null) {
                         gamesOnServer.updateData("blackUsername", g.getGameID(), r.getUserJoining().getUsername());
-                        return new JoinGameResponse(200, "");
+                        return new JoinGameResponse(200, g.getGame());
                     } else {
                         return new JoinGameResponse(403, "Error: already taken");
                     }

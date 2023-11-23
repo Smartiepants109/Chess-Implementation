@@ -13,7 +13,7 @@ public class RegistrationRequest {
      */
     String password;
     /**
-     * email address of the user. TODO verify that it is valid email address.
+     * email address of the user.  verify that it is valid email address.
      */
     String email;
 

@@ -2,19 +2,24 @@ package Server.DataAccess;
 
 import Models.Game;
 import chess.ChessBoard;
+import chess.ChessGame;
 import chess.ChessPiece;
 import chessGame.ChessBoardImp;
 import chessGame.ChessGameImp;
 import chessGame.ChessPieceImp;
-import com.google.gson.*;
+import chessGame.ChessPositionImp;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
 
-import java.lang.reflect.Type;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Random;
-
 
 
 /**
@@ -40,21 +45,64 @@ public class GameDAO {
     }
 
 
-    class BoardAdapter implements JsonDeserializer<ChessBoard> {
+    class BoardAdapter extends TypeAdapter<ChessGame> {
+
         @Override
-        public ChessBoard deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-            var builder = new GsonBuilder();
-            builder.registerTypeAdapter(ChessPiece.class, new PieceAdapter());
-            return new Gson().fromJson(jsonElement, ChessBoardImp.class);
+        public void write(JsonWriter jw, ChessGame board) throws IOException {
+            jw.beginObject();
+            jw.name("currentTurn");
+            if (board.getTeamTurn().equals(ChessGame.TeamColor.WHITE)) {
+                jw.value("WHITE"); //white is 1, black is 0.
+            } else {
+                jw.value("BLACK");
+            }
+            //now for the game board. hoo boy.
+            jw.name("board");
+            jw.beginArray();
+            ChessBoard board1 = board.getBoard();
+            for (int i = 1; i <= 8; i++) {
+                for (int j = 1; j <= 8; j++) {
+                    ChessPiece piece = board1.getPiece(new ChessPositionImp(i, j));
+                    jw.value(ChessPieceImp.GoToNum((ChessPieceImp) piece));
+                }
+            }
+            jw.endArray();
+            jw.endObject();
+
+        }
+
+        @Override
+        public ChessGame read(JsonReader jsonReader) throws IOException {
+            ChessGameImp cgi = new ChessGameImp();
+            jsonReader.beginObject();
+            String name = null;
+            while (jsonReader.hasNext()) {
+                JsonToken token = jsonReader.peek();
+                if (token.equals(JsonToken.NAME)) {
+                    name = jsonReader.nextName();
+                }
+                if (name.equals("currentTurn")) {
+                    token = jsonReader.peek();
+                    cgi.setTeamTurn(jsonReader.nextString());
+                }
+                if (name.equals("board")) {
+                    ChessBoardImp cbi = new ChessBoardImp();
+                    token = jsonReader.peek();
+                    jsonReader.beginArray();
+                    for (int i = 0; i < 8; i++) {
+                        for (int j = 0; j < 8; j++) {
+                            cbi.addPiece(new ChessPositionImp(i + 1, j + 1), ChessPieceImp.GetFromNum(jsonReader.nextInt()));
+                        }
+                    }
+                    jsonReader.endArray();
+                    cgi.setBoard(cbi);
+                }
+            }
+            jsonReader.endObject();
+            return cgi;
         }
     }
 
-    class PieceAdapter implements JsonDeserializer<ChessPiece> {
-        @Override
-        public ChessPiece deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-            return new Gson().fromJson(jsonElement, ChessPieceImp.class);
-        }
-    }
 
     /**
      * Opens the interface.
@@ -77,7 +125,9 @@ public class GameDAO {
             preparedStatement.setString(2, game.getGameName());
             preparedStatement.setString(3, game.getWhiteUsername());
             preparedStatement.setString(4, game.getBlackUsername());
-            preparedStatement.setString(5, new Gson().toJson(game.getGame()));
+            GsonBuilder gb = new GsonBuilder();
+            gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
+            preparedStatement.setString(5, gb.create().toJson(game.getGame()));
             var rs = preparedStatement.executeUpdate();
             return !(rs == 0);
         } catch (SQLException e) {
@@ -116,8 +166,7 @@ public class GameDAO {
     private Game DeserializeGame(int gameID, String gameName, String wU, String bU, String game) {
         var builder = new GsonBuilder();
 
-        builder.registerTypeAdapter(ChessBoard.class, new BoardAdapter());
-        builder.registerTypeAdapter(ChessPiece.class, new PieceAdapter());
+        builder.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
 
         return new Game(gameID, gameName, wU, bU, builder.create().fromJson(game, ChessGameImp.class));
     }
@@ -132,7 +181,7 @@ public class GameDAO {
         }
     }
 
-    public ArrayList<Game> findall() throws DataAccessException { //FIXME
+    public ArrayList<Game> findall() throws DataAccessException {
         try (var conn = db.getConnection()) {
             var preparedStatement = conn.prepareStatement("SELECT gameID, game, gameName, whiteUsername, blackUsername FROM games");
             var rs = preparedStatement.executeQuery();

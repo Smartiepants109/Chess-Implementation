@@ -9,7 +9,6 @@ import java.util.Random;
 import java.util.Set;
 
 
-
 /**
  * DAO  for authentication tokens.
  */
@@ -139,11 +138,8 @@ public class AuthDAO {
         if (userJoining.getAuthToken() == null) {
             return false;
         }
-        AuthData t = findToken(userJoining.getUsername());
-        if (t == null) {
-            return false;
-        }
-        return userJoining.getAuthToken().equals(t.getAuthToken());
+        String username = findUsernameFromToken(userJoining.getAuthToken());
+        return username.equals(userJoining.getUsername());
     }
 
     public String findUsernameFromToken(String token) throws DataAccessException {

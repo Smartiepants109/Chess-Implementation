@@ -56,7 +56,6 @@ public class ChessBoardImp implements ChessBoard {
     }
 
     public void movePiece(ChessPosition start, ChessPosition end) {
-        //Track dead pieces? Potential TODO here
         board[end.getRow() - 1][end.getColumn() - 1] = board[start.getRow() - 1][start.getColumn() - 1];
         board[start.getRow() - 1][start.getColumn() - 1] = null;
     }

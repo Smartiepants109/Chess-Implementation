@@ -5,6 +5,7 @@ package ui;
  */
 public class EscapeSequences {
 
+    public static final String CHESS_FONT = "";//TODO figure out later lol
     private static final String UNICODE_ESCAPE = "\u001b";
     private static final String ANSI_ESCAPE = "\033";
 
@@ -60,6 +61,11 @@ public class EscapeSequences {
     public static final String BLACK_ROOK = " ♜ ";
     public static final String BLACK_PAWN = " ♟ ";
     public static final String EMPTY = " \u2003 ";
+    public static final String SET_TEXT_ERROR = SET_TEXT_BOLD + SET_TEXT_COLOR_RED + SET_BG_COLOR_BLACK;
+    public static final String RESET_ALL = RESET_BG_COLOR + RESET_TEXT_COLOR + RESET_TEXT_ITALIC + RESET_TEXT_BLINKING + RESET_TEXT_UNDERLINE + RESET_TEXT_BOLD_FAINT;
+    public static final String SUCCESS_FONT = EscapeSequences.RESET_ALL + EscapeSequences.SET_TEXT_COLOR_BLUE + EscapeSequences.SET_TEXT_FAINT;
 
-    public static String moveCursorToLocation(int x, int y) { return UNICODE_ESCAPE + "[" + y + ";" + x + "H"; }
+    public static String moveCursorToLocation(int x, int y) {
+        return UNICODE_ESCAPE + "[" + y + ";" + x + "H";
+    }
 }

@@ -27,7 +27,7 @@ public class Game {
      * Representation of chess game. To avoid being overly saturated,
      * will likely replace with something else that gives all information neccesary, but without excess.
      */
-    transient ChessGame game;
+    ChessGame game;
 
     /**
      * creates a new "game" with unique ID and no players.
@@ -36,8 +36,9 @@ public class Game {
         gameID = id;
         blackUsername = null;
         whiteUsername = null;
-        gameName = ""; // when and where would this be used? Confused. for now is blank. FIXME
+        gameName = "";
         game = new ChessGameImp();
+        game.getBoard().resetBoard();
     }
 
     public Game(int gameID, String gameName, String wU, String bU, ChessGame chessGame) {
@@ -57,7 +58,7 @@ public class Game {
     }
 
     public ChessGame getGame() {
-        return game; //? Where will main access point be? FIXME if not neccesary.
+        return game;
     }
 
     public String getWhiteUsername() {

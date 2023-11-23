@@ -3,20 +3,18 @@ package chessGame;
 import chess.*;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Vector;
 
 public class ChessGameImp implements ChessGame {
 
     TeamColor currentTurn;
     ChessBoard board;
-    Map<ChessBoard, Integer> pastMoves;
 
     public ChessGameImp() {
         currentTurn = TeamColor.WHITE;
         board = new ChessBoardImp();
-        pastMoves = new HashMap<ChessBoard, Integer>();
+//        pastMoves = new HashMap<ChessBoard, Integer>();
+
     }
 
     @Override
@@ -69,12 +67,7 @@ public class ChessGameImp implements ChessGame {
     @Override
     public void makeMove(ChessMove move) throws InvalidMoveException {
         int count = 0;
-        if (pastMoves.containsKey(board)) {
-            count = pastMoves.get(board);
-            pastMoves.replace(board, count, count + 1);
-        } else {
-            pastMoves.put(board, 1);
-        }
+
         ChessPosition s = move.getStartPosition();
         if (board.getPiece(s).getTeamColor() != currentTurn) {
             throw new InvalidMoveException("Attempted to play out of turn.");
@@ -158,11 +151,11 @@ public class ChessGameImp implements ChessGame {
 
     @Override
     public boolean isInStalemate(TeamColor teamColor) {
-        for (Map.Entry<ChessBoard, Integer> entry : pastMoves.entrySet()) {
-            if (entry.getValue() >= 3) {
-                return true;
-            }
-        } //Threefold repetition implementation.
+//        for (Map.Entry<ChessBoard, Integer> entry : pastMoves.entrySet()) {
+//            if (entry.getValue() >= 3) {
+//                return true;
+//            }
+//        } //Threefold repetition implementation. Removed because it was really dumb.
         //no legal moves for u
         Vector<ChessMove> moves = new Vector<>();
         for (int i = 1; i < 8; i++) {
@@ -190,5 +183,14 @@ public class ChessGameImp implements ChessGame {
     @Override
     public ChessBoard getBoard() {
         return board;
+    }
+
+    public void setTeamTurn(String b) {
+        //white is 1 black is 0
+        if (b.equals("WHITE")) {
+            currentTurn = TeamColor.WHITE;
+        } else {
+            currentTurn = TeamColor.BLACK;
+        }
     }
 }

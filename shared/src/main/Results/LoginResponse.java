@@ -30,7 +30,7 @@ public class LoginResponse {
      */
     static int BAD_REQUEST = 400;
     /**
-     * code for when you try to access a user when you aren't logged in.
+     * incorrect credentials
      */
     static int UNAUTHORIZED = 401;
     /**

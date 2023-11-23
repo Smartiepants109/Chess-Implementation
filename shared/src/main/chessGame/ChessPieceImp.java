@@ -1,8 +1,11 @@
 package chessGame;
 
 import chess.ChessBoard;
+import chess.ChessGame;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Implementation of the ChessPiece interface
@@ -21,6 +24,42 @@ public class ChessPieceImp implements chess.ChessPiece {
      * For Queens: Error piece, tried to find OoB item. All others: Have they moved? Used for specific rules for Pawn, King, and Rook.
      */
     boolean isError;
+
+    public static ChessPieceImp GetFromNum(int piece) {
+        if (piece == -1) {
+            return null;
+        }
+        boolean isError = false;
+        ChessGame.TeamColor tc = ChessGame.TeamColor.BLACK;
+        if (piece >= 60) {
+            isError = true;
+            piece -= 60;
+        }
+        if (piece >= 20) {
+            tc = ChessGame.TeamColor.WHITE;
+            piece -= 20;
+        }
+
+        ChessPieceImp output = new ChessPieceImp(tc, PieceType.values()[piece]);
+        return output;
+    }
+
+    public static int GoToNum(ChessPieceImp piece) {
+        if (piece == null) {
+            return -1;
+        }
+        int output = piece.getPieceType().ordinal();
+        if (piece.getTeamColor().equals(ChessGame.TeamColor.WHITE)) {
+            output += 20;
+        }
+        //possible values now 0-20. Don't ask, I just don't trust.
+        if (piece.isError) {
+            output += 60;
+        }
+        //0-40
+
+        return output;
+    }
 
     public boolean isVariable() {
         return isError;
@@ -182,7 +221,6 @@ public class ChessPieceImp implements chess.ChessPiece {
                 }
                 break;
             case KING:
-                //TODO: Check for castling, if possible, enable.
                 ChessPieceImp leftWhiteStarter = (ChessPieceImp) board.getPiece(ChessPositionImp.DEFTWHITEROOKLEFTSTART);
                 if (leftWhiteStarter != null) {
                     if (isError && myPosition.equals(ChessPositionImp.DEFTWHITEKINGSTART) && leftWhiteStarter.getPieceType() == PieceType.ROOK && leftWhiteStarter.isError) {

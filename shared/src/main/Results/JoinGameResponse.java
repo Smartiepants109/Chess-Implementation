@@ -1,9 +1,12 @@
 package Results;
 
+import chess.ChessGame;
+
 /**
  * Container consisting of a response code and a more detailed message.
  */
 public class JoinGameResponse {
+    ChessGame game;
     /**
      * General information about success or failure of the request. See constants for general use codes.
      */
@@ -42,6 +45,11 @@ public class JoinGameResponse {
     public JoinGameResponse(int code, String message) {
         responseCode = code;
         this.message = message;
+    }
+
+    public JoinGameResponse(int code, ChessGame game) {
+        responseCode = code;
+        this.game = game;
     }
 
     public int getstatcode() {

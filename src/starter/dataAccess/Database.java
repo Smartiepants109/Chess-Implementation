@@ -25,7 +25,6 @@ import java.util.LinkedList;
  */
 public class Database {
 
-    // FIXME: Change these fields, if necessary, to match your database configuration
     public static final String DB_NAME = "chessdatabase";
     private static final String DB_USERNAME = "class";
     private static final String DB_PASSWORD = "cs240";
