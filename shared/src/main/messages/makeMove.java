@@ -4,8 +4,8 @@ import chessGame.ChessMoveImp;
 import webSocketMessages.userCommands.UserGameCommand;
 
 public class makeMove extends UserGameCommand {
-    int gameID;
-    ChessMoveImp move;
+    public int gameID;
+    public ChessMoveImp move;
     public makeMove(String authToken, int gameID, ChessMoveImp move) {
         super(authToken);
         this.commandType = CommandType.MAKE_MOVE;

@@ -1,6 +1,7 @@
 package Server;
 
 import Models.AuthData;
+import Models.Game;
 import Requests.*;
 import Results.*;
 import Server.DataAccess.AuthDAO;
@@ -8,20 +9,33 @@ import Server.DataAccess.GameDAO;
 import Server.DataAccess.UserDAO;
 import Server.Services.*;
 import chess.ChessGame;
+import chessGame.BoardAdapter;
+import chessGame.ChessGameImp;
+import chessGame.ChessPositionImp;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
+import messages.*;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
+import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.UserGameCommand;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Vector;
 
-
+class conInfo {
+    Session sess;
+    String authToken;
+    int gameID;
+}
 
 @WebSocket
 public class Server {
@@ -30,6 +44,7 @@ public class Server {
     GameDAO games = new GameDAO(db);
     UserDAO users = new UserDAO(db);
     Gson gson = new Gson();
+    Vector<conInfo> connections = new Vector<conInfo>();
 
     public static void main(String[] args) {
         new Server().run();
@@ -46,6 +61,7 @@ public class Server {
             throw new RuntimeException();
         }
 
+        Spark.webSocket("/connect", Server.class);
 
         // Register a directory for hosting static files
         Spark.externalStaticFileLocation("web");
@@ -58,15 +74,125 @@ public class Server {
         Spark.post("/game", this::createGameHandler);
         Spark.put("/game", this::joinGameHandler);
         Spark.delete("db", this::clearDBHandler);
-        Spark.webSocket("/connect", Server.class);
         Spark.get("/echo/:msg", (req, res) -> "HTTP response: " + req.params(":msg"));
 
     }
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
+        GsonBuilder gb = new GsonBuilder();
+        gb.registerTypeAdapter(UserGameCommand.class, new UserMessageAdapter());
+        UserGameCommand sm = gb.create().fromJson(message, UserGameCommand.class);
+        switch (sm.getCommandType()) {
+            case JOIN_PLAYER -> {
+                JoinPlayer jp = (JoinPlayer) sm;
+                addSession(session, jp.getAuthString(), jp.gameID);
+                //nothing, they already joined. anything here to upgrade connection?
+                notificationMessage nm = new notificationMessage("Player has joined the server on team " + jp.playerColor.toString());
+                broadcast(gb.create().toJson(nm, UserGameCommand.class), jp.gameID, jp.getAuthString());
+                Game g = games.findGame(jp.gameID);
+                gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
+                loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
+                session.getRemote().sendString(gb.create().toJson(lg, ServerMessage.class));
+            }
+            case JOIN_OBSERVER -> {
+                joinObserver jp = (joinObserver) sm;
+                addSession(session, jp.getAuthString(), jp.gameID);
+                //nothing, they already joined. anything here to upgrade connection?
+                notificationMessage nm = new notificationMessage("Observer has joined the server");
+                broadcast(gb.create().toJson(nm, UserGameCommand.class), jp.gameID, jp.getAuthString());
+                Game g = games.findGame(jp.gameID);
+                gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
+                loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
+                session.getRemote().sendString(gb.create().toJson(lg, ServerMessage.class));
+                //same as above?
+            }
+            case MAKE_MOVE -> {
+                makeMove mm = (makeMove) sm;
+                if (tokens.findUsernameFromToken(mm.getAuthString()) != null) {
+                    Game g = games.findGame(mm.gameID);
+                    ChessPositionImp startpos = (ChessPositionImp) mm.move.getStartPosition();
+                    if (g.getGame().validMoves(startpos).contains(mm.move)) {
+                        g.getGame().makeMove(mm.move);
+                        gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
+                        games.updateData("game", mm.gameID, gb.create().toJson(g.getGame(), ChessGameImp.class));
+                        loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
+                        broadcast(gb.create().toJson(lg, ServerMessage.class), mm.gameID, null);
+                        broadcast(gb.create().toJson(new notificationMessage("Player has made move" + mm.move.toString()), ServerMessage.class), mm.gameID, mm.getAuthString());
+                    } else {
+                        errorMessage em = new errorMessage("invalid move");
+                        gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+                        session.getRemote().sendString(gb.create().toJson(em, ServerMessage.class));
+                    }
+
+
+                } else {
+                    errorMessage em = new errorMessage("invalid auth token");
+                    gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+                    session.getRemote().sendString(gb.create().toJson(em, ServerMessage.class));
+                }
+            }
+            case LEAVE -> {
+                leave l = (leave) sm;
+                if (tokens.findUsernameFromToken(l.getAuthString()) != null) {
+                    //TODO: Notify all that need to be notified.
+                } else {
+                    errorMessage em = new errorMessage("invalid auth token");
+                    gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+                    session.getRemote().sendString(gb.create().toJson(em, ServerMessage.class));
+                }
+            }
+            case RESIGN -> {
+                resign r = (resign) sm;
+                if (tokens.findUsernameFromToken(r.getAuthString()) != null) {
+                    //TODO: Notify all that need to be notified.
+                } else {
+                    errorMessage em = new errorMessage("invalid auth token");
+                    gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+                    session.getRemote().sendString(gb.create().toJson(em, ServerMessage.class));
+                }
+            }
+        }
         System.out.printf("Received: %s", message);
         session.getRemote().sendString("WebSocket response: " + message);
+    }
+
+    private void addSession(Session session, String authString, int gameID) {
+        boolean add = true;
+        for (int i = 0; i < connections.size(); i++) {
+            var con = connections.elementAt(i);
+            if (con.gameID == gameID) {
+                if (con.authToken.equals(authString)) {
+                    add = false;
+                    if (con.sess.equals(session)) {
+                        add = true;
+                        add = false;
+                    }
+                }
+            }
+        }
+        if (add) {
+            conInfo ci = new conInfo();
+            ci.sess = session;
+            ci.authToken = authString;
+            ci.gameID = gameID;
+            connections.add(ci);
+        }
+    }
+
+    private void broadcast(String message, int gameID, String tokenToAvoid) {
+        for (int i = 0; i < connections.size(); i++) {
+            var con = connections.elementAt(i);
+            if (con.gameID == gameID) {
+                if (!con.authToken.equals(tokenToAvoid)) {
+                    try {
+                        con.sess.getRemote().sendString(message);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
     }
 
     private void configureDB() throws DataAccessException {

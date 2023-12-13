@@ -8,9 +8,7 @@ import chess.ChessPiece;
 import chessGame.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import messages.ServerMessageAdapter;
-import messages.makeMove;
-import messages.resign;
+import messages.*;
 import webSocketMessages.serverMessages.ServerMessage;
 
 import javax.websocket.*;
@@ -26,6 +24,9 @@ import java.util.*;
 
 public class client extends Endpoint {
     static Scanner userInput;
+    static boolean isPlayer;
+    static String playerColor;
+    static ChessGameImp currentBoardState;
 
     public client() throws Exception {
         URI uri = new URI("ws://localhost:8080/connect");
@@ -38,8 +39,30 @@ public class client extends Endpoint {
                 GsonBuilder gb = new GsonBuilder();
                 gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
                 sm = gb.create().fromJson(message, ServerMessage.class);
+                DoTaskBasedOnType(sm);
             }
         });
+    }
+
+    private void DoTaskBasedOnType(ServerMessage sm) {
+        switch (sm.getServerMessageType()) {
+            case LOAD_GAME:
+                loadGameMessage lgm = (loadGameMessage) sm;
+                currentBoardState = new ChessGameImp((Map) lgm);
+                if (!isPlayer || playerColor.toLowerCase().equals("white")) {
+                    PrintBoardInGame(currentBoardState);
+                }
+                PrintBoardInGameButUpsideDownThisTime(currentBoardState);
+                if (isPlayer && playerColor.toLowerCase().equals("black")) {
+                    PrintBoardInGame(currentBoardState);
+                }
+                break;
+            case ERROR:
+                println(EscapeSequences.SET_TEXT_ERROR, "Error: ", ((errorMessage) sm).errorMessage, EscapeSequences.RESET_ALL);
+                break;
+            case NOTIFICATION:
+                println("Info: ", ((notificationMessage) sm).message);
+        }
     }
 
     public static Session session;
@@ -261,8 +284,10 @@ public class client extends Endpoint {
 
     private static void connectedLoop(client ws, boolean player, AuthData sessionInfo, String color, int id, Scanner input, ChessGameImp cgi) {
         println(EscapeSequences.WHITE_QUEEN, "Welcome to CS 240 chess! Type \"help\" to get started!", EscapeSequences.BLACK_QUEEN);
+        isPlayer = player;
+        playerColor = color;
         String command = userInput.next();
-        ChessGameImp currentBoardState = cgi;
+        currentBoardState = cgi;
         try {
             URI uri;
             while (!(command.toLowerCase().equals("leave") || command.toLowerCase().equals("exit"))) {
@@ -340,6 +365,8 @@ public class client extends Endpoint {
                 System.out.print(EscapeSequences.RESET_ALL);
                 command = userInput.next();
             }
+            leave lv = new leave(sessionInfo.getAuthToken(), id);
+            ws.send(new Gson().toJson(lv, lv.getClass()));
 
         } catch (IllegalStateException |
                  NoSuchElementException e) {
