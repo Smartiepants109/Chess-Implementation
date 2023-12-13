@@ -29,6 +29,7 @@ public class ChessBoardImp implements ChessBoard {
 
     /**
      * copies all information from one board to a new board.
+     *
      * @param oldBoard board to copy
      */
     public ChessBoardImp(ChessBoard oldBoard) {
@@ -43,6 +44,7 @@ public class ChessBoardImp implements ChessBoard {
 
     /**
      * adds a piece to the board at the specified position.
+     *
      * @param position where to add the piece to
      * @param piece    the piece to add. DOES NOT COPY. USE PROPER PIECE
      */
@@ -108,20 +110,33 @@ public class ChessBoardImp implements ChessBoard {
         }
     }
 
+    public String upsideDownToString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            printLine(sb, i);
+        }
+
+        return sb.toString();
+    }
+
+    public void printLine(StringBuilder sb, int i) {
+        sb.append("|");
+        for (int j = 0; j < 8; j++) {
+            if (board[i][j] == null) {
+                sb.append(" ");
+            } else {
+                sb.append(board[i][j].toString());
+            }
+            sb.append("|");
+        }
+        sb.append("\n");
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 7; i >= 0; i--) {
-            sb.append("|");
-            for (int j = 0; j < 8; j++) {
-                if (board[i][j] == null) {
-                    sb.append(" ");
-                } else {
-                    sb.append(board[i][j].toString());
-                }
-                sb.append("|");
-            }
-            sb.append("\n");
+            printLine(sb, i);
         }
 
         return sb.toString();

@@ -1,11 +1,10 @@
-package ui;
+package Requests;
 
 /**
  * This class contains constants and functions relating to ANSI Escape Sequences that are useful in the Client display
  */
 public class EscapeSequences {
 
-    public static final String CHESS_FONT = "";//TODO figure out later lol
     private static final String UNICODE_ESCAPE = "\u001b";
     private static final String ANSI_ESCAPE = "\033";
 
@@ -64,6 +63,16 @@ public class EscapeSequences {
     public static final String SET_TEXT_ERROR = SET_TEXT_BOLD + SET_TEXT_COLOR_RED + SET_BG_COLOR_BLACK;
     public static final String RESET_ALL = RESET_BG_COLOR + RESET_TEXT_COLOR + RESET_TEXT_ITALIC + RESET_TEXT_BLINKING + RESET_TEXT_UNDERLINE + RESET_TEXT_BOLD_FAINT;
     public static final String SUCCESS_FONT = EscapeSequences.RESET_ALL + EscapeSequences.SET_TEXT_COLOR_BLUE + EscapeSequences.SET_TEXT_FAINT;
+    public static final String SET_TEXT_OUTSIDE = RESET_ALL + SET_TEXT_ITALIC + SET_BG_COLOR_LIGHT_GREY + SET_TEXT_COLOR_BLACK;
+    public static final String TEXT_CHESS_BLACKBG = RESET_ALL + SET_TEXT_BOLD + SET_BG_COLOR_BLACK;
+    public static final String TEXT_CHESS_BLACKPC = SET_TEXT_COLOR_BLUE;
+    public static final String TEXT_CHESS_WHITEBG = RESET_ALL + SET_TEXT_BOLD + SET_BG_COLOR_WHITE;
+    public static final String TEXT_CHESS_WHITEPC = SET_TEXT_COLOR_RED;
+    public static final String WHITE_ON_BLACK = TEXT_CHESS_BLACKBG + TEXT_CHESS_WHITEPC;
+    public static final String BLACK_ON_WHITE = TEXT_CHESS_WHITEBG + TEXT_CHESS_BLACKPC;
+    public static final String WHITE_ON_WHITE = TEXT_CHESS_WHITEBG + TEXT_CHESS_WHITEPC;
+    public static final String BLACK_ON_BLACK = TEXT_CHESS_BLACKBG + TEXT_CHESS_BLACKPC;
+
 
     public static String moveCursorToLocation(int x, int y) {
         return UNICODE_ESCAPE + "[" + y + ";" + x + "H";

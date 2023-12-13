@@ -3,6 +3,8 @@ package chessGame;
 import chess.*;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 public class ChessGameImp implements ChessGame {
@@ -15,6 +17,26 @@ public class ChessGameImp implements ChessGame {
         board = new ChessBoardImp();
 //        pastMoves = new HashMap<ChessBoard, Integer>();
 
+    }
+
+    public ChessGameImp(Map map2) {
+        this.currentTurn = (((String) (map2.get("currentTurn"))).toUpperCase().equals("WHITE")) ? TeamColor.WHITE : TeamColor.BLACK;
+        this.board = new ChessBoardImp();
+        Map nm = (Map) map2.get("board");
+        List ol = (List) nm.get("board");
+        for (int i = 0; i < 8; i++) {
+            List il = (List) ol.get(i);
+            if (!il.isEmpty()) {
+                for (int j = 0; j < 8; j++) {
+                    if (il.get(j) != null) {
+                        Map pm = (Map) il.get(j);
+                        ChessPieceImp pieceToAdd = new ChessPieceImp(TeamColor.valueOf((String) pm.get("color")), ChessPiece.PieceType.valueOf((String) pm.get("pieceType")));
+                        pieceToAdd.isError = (boolean) pm.get("isError");
+                        board.addPiece(new ChessPositionImp(i + 1, j + 1), pieceToAdd);
+                    }
+                }
+            }
+        }
     }
 
     @Override

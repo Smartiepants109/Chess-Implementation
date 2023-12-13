@@ -1,5 +1,6 @@
 package chessGame;
 
+import Requests.EscapeSequences;
 import chess.ChessBoard;
 import chess.ChessGame;
 
@@ -386,5 +387,54 @@ public class ChessPieceImp implements chess.ChessPiece {
             }
 
         }
+    }
+
+    public String getPieceTypeAsString() {
+        if (color.equals(ChessGame.TeamColor.BLACK)) {
+            switch (pieceType) {
+
+                case KING -> {
+                    return EscapeSequences.BLACK_KING;
+                }
+                case QUEEN -> {
+                    return EscapeSequences.BLACK_QUEEN;
+                }
+                case BISHOP -> {
+                    return EscapeSequences.BLACK_BISHOP;
+                }
+                case KNIGHT -> {
+                    return EscapeSequences.BLACK_KNIGHT;
+                }
+                case ROOK -> {
+                    return EscapeSequences.BLACK_ROOK;
+                }
+                case PAWN -> {
+                    return EscapeSequences.BLACK_PAWN;
+                }
+            }
+        } else {
+            switch (pieceType) {
+
+                case KING -> {
+                    return EscapeSequences.WHITE_KING;
+                }
+                case QUEEN -> {
+                    return EscapeSequences.WHITE_QUEEN;
+                }
+                case BISHOP -> {
+                    return EscapeSequences.WHITE_BISHOP;
+                }
+                case KNIGHT -> {
+                    return EscapeSequences.WHITE_KNIGHT;
+                }
+                case ROOK -> {
+                    return EscapeSequences.WHITE_ROOK;
+                }
+                case PAWN -> {
+                    return EscapeSequences.WHITE_PAWN;
+                }
+            }
+        }
+        return null;
     }
 }

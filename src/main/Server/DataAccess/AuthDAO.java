@@ -139,6 +139,9 @@ public class AuthDAO {
             return false;
         }
         String username = findUsernameFromToken(userJoining.getAuthToken());
+        if(username == null){
+            return false;
+        }
         return username.equals(userJoining.getUsername());
     }
 

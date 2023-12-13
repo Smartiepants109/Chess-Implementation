@@ -11,6 +11,9 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import dataAccess.DataAccessException;
 import dataAccess.Database;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import spark.Request;
 import spark.Response;
 import spark.Spark;
@@ -19,6 +22,8 @@ import java.sql.SQLException;
 import java.util.Map;
 
 
+
+@WebSocket
 public class Server {
     Database db = new Database();
     AuthDAO tokens = new AuthDAO(db);
@@ -53,7 +58,15 @@ public class Server {
         Spark.post("/game", this::createGameHandler);
         Spark.put("/game", this::joinGameHandler);
         Spark.delete("db", this::clearDBHandler);
+        Spark.webSocket("/connect", Server.class);
+        Spark.get("/echo/:msg", (req, res) -> "HTTP response: " + req.params(":msg"));
 
+    }
+
+    @OnWebSocketMessage
+    public void onMessage(Session session, String message) throws Exception {
+        System.out.printf("Received: %s", message);
+        session.getRemote().sendString("WebSocket response: " + message);
     }
 
     private void configureDB() throws DataAccessException {
@@ -105,10 +118,10 @@ public class Server {
         ChessGame.TeamColor color = null;
         String body = request.body();
         String colorSTR = getParameter(body, "playerColor");
-        if (colorSTR == null) {
+        if (colorSTR == null || colorSTR.equals("null")) {
             color = null;
         } else {
-            if (colorSTR.equals("WHITE")) {
+            if (colorSTR.toUpperCase().equals("WHITE")) {
                 color = ChessGame.TeamColor.WHITE;
             } else {
                 color = ChessGame.TeamColor.BLACK;
