@@ -89,22 +89,22 @@ public class Server {
                 addSession(session, jp.getAuthString(), jp.gameID);
                 //nothing, they already joined. anything here to upgrade connection?
                 notificationMessage nm = new notificationMessage("Player has joined the server on team " + jp.playerColor.toString());
-                broadcast(gb.create().toJson(nm, UserGameCommand.class), jp.gameID, jp.getAuthString());
+                broadcast(gb.create().toJson(nm), jp.gameID, jp.getAuthString());
                 Game g = games.findGame(jp.gameID);
                 gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
                 loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
-                session.getRemote().sendString(gb.create().toJson(lg, ServerMessage.class));
+                session.getRemote().sendString(gb.create().toJson(lg));
             }
             case JOIN_OBSERVER -> {
                 joinObserver jp = (joinObserver) sm;
                 addSession(session, jp.getAuthString(), jp.gameID);
                 //nothing, they already joined. anything here to upgrade connection?
                 notificationMessage nm = new notificationMessage("Observer has joined the server");
-                broadcast(gb.create().toJson(nm, UserGameCommand.class), jp.gameID, jp.getAuthString());
+                broadcast(gb.create().toJson(nm), jp.gameID, jp.getAuthString());
                 Game g = games.findGame(jp.gameID);
                 gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
                 loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
-                session.getRemote().sendString(gb.create().toJson(lg, ServerMessage.class));
+                session.getRemote().sendString(gb.create().toJson(lg));
                 //same as above?
             }
             case MAKE_MOVE -> {
@@ -117,19 +117,19 @@ public class Server {
                         gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
                         games.updateData("game", mm.gameID, gb.create().toJson(g.getGame(), ChessGameImp.class));
                         loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
-                        broadcast(gb.create().toJson(lg, ServerMessage.class), mm.gameID, null);
-                        broadcast(gb.create().toJson(new notificationMessage("Player has made move" + mm.move.toString()), ServerMessage.class), mm.gameID, mm.getAuthString());
+                        broadcast(gb.create().toJson(lg), mm.gameID, null);
+                        broadcast(gb.create().toJson(new notificationMessage("Player has made move" + mm.move.toString())), mm.gameID, mm.getAuthString());
                     } else {
                         errorMessage em = new errorMessage("invalid move");
                         gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
-                        session.getRemote().sendString(gb.create().toJson(em, ServerMessage.class));
+                        session.getRemote().sendString(gb.create().toJson(em));
                     }
 
 
                 } else {
                     errorMessage em = new errorMessage("invalid auth token");
                     gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
-                    session.getRemote().sendString(gb.create().toJson(em, ServerMessage.class));
+                    session.getRemote().sendString(gb.create().toJson(em));
                 }
             }
             case LEAVE -> {
@@ -139,7 +139,7 @@ public class Server {
                 } else {
                     errorMessage em = new errorMessage("invalid auth token");
                     gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
-                    session.getRemote().sendString(gb.create().toJson(em, ServerMessage.class));
+                    session.getRemote().sendString(gb.create().toJson(em));
                 }
             }
             case RESIGN -> {
@@ -149,7 +149,7 @@ public class Server {
                 } else {
                     errorMessage em = new errorMessage("invalid auth token");
                     gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
-                    session.getRemote().sendString(gb.create().toJson(em, ServerMessage.class));
+                    session.getRemote().sendString(gb.create().toJson(em));
                 }
             }
         }

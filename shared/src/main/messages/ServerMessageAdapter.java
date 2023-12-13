@@ -29,7 +29,7 @@ public class ServerMessageAdapter extends TypeAdapter<ServerMessage> {
             case LOAD_GAME:
                 var l = (loadGameMessage) serverMessage;
                 jw.name("game");
-                jw.value(l.gameString);
+                jw.value(l.game);
                 break;
         }
         jw.endObject();
