@@ -86,26 +86,52 @@ public class Server {
         switch (sm.getCommandType()) {
             case JOIN_PLAYER -> {
                 JoinPlayer jp = (JoinPlayer) sm;
-                addSession(session, jp.getAuthString(), jp.gameID);
-                //nothing, they already joined. anything here to upgrade connection?
-                notificationMessage nm = new notificationMessage("Player has joined the server on team " + jp.playerColor.toString());
-                broadcast(gb.create().toJson(nm), jp.gameID, jp.getAuthString());
-                Game g = games.findGame(jp.gameID);
-                gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
-                loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
-                session.getRemote().sendString(gb.create().toJson(lg));
+                if (tokens.findUsernameFromToken(jp.getAuthString()) != null) {
+                    addSession(session, jp.getAuthString(), jp.gameID);
+                    //nothing, they already joined. anything here to upgrade connection?
+                    notificationMessage nm = new notificationMessage("Player has joined the server on team " + jp.playerColor.toString());
+                    broadcast(gb.create().toJson(nm), jp.gameID, jp.getAuthString());
+                    Game g = games.findGame(jp.gameID);
+                    if (g == null) {
+                        invalidGameIDMsgSend(session, gb);
+                    }
+                    if (jp.playerColor == ChessGame.TeamColor.WHITE && g.getWhiteUsername() == null) {
+                        DatabaseNotUpdatedProperlyErrorSend(session, gb);
+                    } else if (jp.playerColor == ChessGame.TeamColor.BLACK && g.getBlackUsername() == null) {
+                        DatabaseNotUpdatedProperlyErrorSend(session, gb);
+                    } else if (jp.playerColor == ChessGame.TeamColor.WHITE && !g.getWhiteUsername().equals(tokens.findUsernameFromToken(jp.getAuthString()))) {
+                        PlayerSlotTakenMessageSend(session, gb);
+                    } else if (jp.playerColor == ChessGame.TeamColor.BLACK && !g.getBlackUsername().equals(tokens.findUsernameFromToken(jp.getAuthString()))) {
+                        PlayerSlotTakenMessageSend(session, gb);
+                    } else {
+                        gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
+                        loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
+                        session.getRemote().sendString(gb.create().toJson(lg));
+                    }
+                } else {
+                    invalidAuthTokenMessageSend(session, gb);
+                }
             }
             case JOIN_OBSERVER -> {
                 joinObserver jp = (joinObserver) sm;
                 addSession(session, jp.getAuthString(), jp.gameID);
                 //nothing, they already joined. anything here to upgrade connection?
-                notificationMessage nm = new notificationMessage("Observer has joined the server");
-                broadcast(gb.create().toJson(nm), jp.gameID, jp.getAuthString());
-                Game g = games.findGame(jp.gameID);
-                gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
-                loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
-                session.getRemote().sendString(gb.create().toJson(lg));
-                //same as above?
+                if (tokens.findUsernameFromToken(jp.getAuthString()) != null) {
+                    addSession(session, jp.getAuthString(), jp.gameID);
+                    //nothing, they already joined. anything here to upgrade connection?
+                    notificationMessage nm = new notificationMessage("Observer has joined the server");
+                    broadcast(gb.create().toJson(nm), jp.gameID, jp.getAuthString());
+                    Game g = games.findGame(jp.gameID);
+                    if (g == null) {
+                        invalidGameIDMsgSend(session, gb);
+                    } else {
+                        gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
+                        loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
+                        session.getRemote().sendString(gb.create().toJson(lg));
+                    }
+                } else {
+                    invalidAuthTokenMessageSend(session, gb);
+                }
             }
             case MAKE_MOVE -> {
                 makeMove mm = (makeMove) sm;
@@ -127,9 +153,7 @@ public class Server {
 
 
                 } else {
-                    errorMessage em = new errorMessage("invalid auth token");
-                    gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
-                    session.getRemote().sendString(gb.create().toJson(em));
+                    invalidAuthTokenMessageSend(session, gb);
                 }
             }
             case LEAVE -> {
@@ -137,9 +161,7 @@ public class Server {
                 if (tokens.findUsernameFromToken(l.getAuthString()) != null) {
                     //TODO: Notify all that need to be notified.
                 } else {
-                    errorMessage em = new errorMessage("invalid auth token");
-                    gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
-                    session.getRemote().sendString(gb.create().toJson(em));
+                    invalidAuthTokenMessageSend(session, gb);
                 }
             }
             case RESIGN -> {
@@ -147,14 +169,36 @@ public class Server {
                 if (tokens.findUsernameFromToken(r.getAuthString()) != null) {
                     //TODO: Notify all that need to be notified.
                 } else {
-                    errorMessage em = new errorMessage("invalid auth token");
-                    gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
-                    session.getRemote().sendString(gb.create().toJson(em));
+                    invalidAuthTokenMessageSend(session, gb);
                 }
             }
         }
         System.out.printf("Received: %s", message);
         session.getRemote().sendString("WebSocket response: " + message);
+    }
+
+    private void DatabaseNotUpdatedProperlyErrorSend(Session session, GsonBuilder gb) throws IOException {
+        errorMessage em = new errorMessage("I have no idea how this happened. internet magic, I suppose. Try again!");
+        gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+        session.getRemote().sendString(gb.create().toJson(em));
+    }
+
+    private void invalidGameIDMsgSend(Session session, GsonBuilder gb) throws IOException {
+        errorMessage em = new errorMessage("invalid game ID.");
+        gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+        session.getRemote().sendString(gb.create().toJson(em));
+    }
+
+    private void PlayerSlotTakenMessageSend(Session session, GsonBuilder gb) throws IOException {
+        errorMessage em = new errorMessage("player slot filled already.");
+        gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+        session.getRemote().sendString(gb.create().toJson(em));
+    }
+
+    private static void invalidAuthTokenMessageSend(Session session, GsonBuilder gb) throws IOException {
+        errorMessage em = new errorMessage("invalid auth token");
+        gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+        session.getRemote().sendString(gb.create().toJson(em));
     }
 
     private void addSession(Session session, String authString, int gameID) {
