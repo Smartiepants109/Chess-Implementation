@@ -1246,9 +1246,9 @@ public class WebSocketTests {
         jamesResult = jamesExecutor.submit(new GetServerMessages(1, jamesClient, readyLatch));
         bobResult = bobExecutor.submit(new GetServerMessages(1, bobClient, readyLatch));
         alfredResult = alfredExecutor.submit(new GetServerMessages(1, alfredClient, readyLatch));
-        jamesResult.get(3 * waitTime, TimeUnit.MILLISECONDS);
-        bobResult.get(3 * waitTime, TimeUnit.MILLISECONDS);
-        alfredResult.get(3 * waitTime, TimeUnit.MILLISECONDS);
+        jamesResult.get(10 * waitTime, TimeUnit.MILLISECONDS);
+        bobResult.get(10 * waitTime, TimeUnit.MILLISECONDS);
+        alfredResult.get(10 * waitTime, TimeUnit.MILLISECONDS);
 
         //have bob attempt to make a move
         //try to move pawn

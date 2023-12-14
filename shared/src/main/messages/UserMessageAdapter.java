@@ -41,13 +41,26 @@ public class UserMessageAdapter extends TypeAdapter<UserGameCommand> {
                 jw.name("authToken");
                 jw.value(mm.getAuthString());
                 jw.name("move");
-                jw.beginArray();
+                jw.beginObject();
+                jw.name("start");
+                jw.beginObject();
+                jw.name("row");
                 jw.value(mm.move.getStartPosition().getRow());
+                jw.name("column");
                 jw.value(mm.move.getStartPosition().getColumn());
+                jw.endObject();
+                jw.name("end");
+                jw.beginObject();
+                jw.name("row");
                 jw.value(mm.move.getEndPosition().getRow());
+                jw.name("column");
                 jw.value(mm.move.getEndPosition().getColumn());
+                jw.endObject();
+                jw.endObject();
+                jw.name("promotion");
                 jw.value(mm.move.getPromotionPiece().toString());
-                jw.endArray();
+
+                jw.endObject();
                 break;
             case JOIN_PLAYER:
                 JoinPlayer jp = (JoinPlayer) ugc;
@@ -101,29 +114,68 @@ public class UserMessageAdapter extends TypeAdapter<UserGameCommand> {
                         if (name.equals("playerColor")) {
                             if (jsonReader.nextString().equals("WHITE")) {
                                 output = new JoinPlayer(auth, gameID, ChessGame.TeamColor.WHITE);
+                                jsonReader.endObject();
+                                return output;
                             } else {
                                 output = new JoinPlayer(auth, gameID, ChessGame.TeamColor.BLACK);
+                                jsonReader.endObject();
+                                return output;
                             }
                         }
 
                     }
+                    case JOIN_OBSERVER -> {
+                        if (gameID != -1 && auth != null) {
+                            output = new joinObserver(auth, gameID);
+                            jsonReader.endObject();
+                            return output;
+                        }
+                    }
                     case MAKE_MOVE -> {
                         if (name.equals("move")) {
-                            jsonReader.beginArray();
-                            output = new makeMove(auth, gameID, new ChessMoveImp(new ChessPositionImp(jsonReader.nextInt(), jsonReader.nextInt()),
-                                    new ChessPositionImp(jsonReader.nextInt(), jsonReader.nextInt()),
-                                    ChessPiece.PieceType.valueOf(jsonReader.nextString())));
+                            jsonReader.beginObject();
+                            int bx, by, ex, ey;
+                            jsonReader.nextName();
+                            jsonReader.beginObject();
+                            jsonReader.nextName();
+                            bx = jsonReader.nextInt();
+                            jsonReader.nextName();
+                            by = jsonReader.nextInt();
+                            jsonReader.endObject();
+                            jsonReader.nextName();
+                            jsonReader.beginObject();
+                            jsonReader.nextName();
+                            ex = jsonReader.nextInt();
+                            jsonReader.nextName();
+                            ey = jsonReader.nextInt();
+                            jsonReader.endObject();
+                            jsonReader.endObject();
+                            ChessPiece.PieceType pt = null;
+                            if (jsonReader.peek().equals(JsonToken.NAME)) {
+                                jsonReader.nextName();
+                                pt = ChessPiece.PieceType.valueOf(jsonReader.nextString());
+                            }
+
+                            jsonReader.endObject();
+                            output = new makeMove(auth, gameID, new ChessMoveImp(new ChessPositionImp(bx + 1, by + 1),
+                                    new ChessPositionImp(ex + 1, ey + 1), pt));
+
+                            return output;
                         }
 
                     }
                     case LEAVE -> {
                         if (gameID != -1 && auth != null) {
                             output = new leave(auth, gameID);
+                            jsonReader.endObject();
+                            return output;
                         }
                     }
                     case RESIGN -> {
                         if (gameID != -1 && auth != null) {
                             output = new resign(auth, gameID);
+                            jsonReader.endObject();
+                            return output;
                         }
                     }
                 }

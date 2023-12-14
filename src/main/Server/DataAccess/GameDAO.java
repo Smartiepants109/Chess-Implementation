@@ -152,4 +152,15 @@ public class GameDAO {
         }
         return result;
     }
+
+    public void removeGame(int gameID) throws DataAccessException{
+        try (var conn = db.getConnection()) {
+            var stmt = conn.prepareStatement("DELETE FROM games WHERE gameID = ?");
+            stmt.setInt(1, gameID);
+            var rs = stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DataAccessException("Error: db is corrupt");
+        }
+    }
 }

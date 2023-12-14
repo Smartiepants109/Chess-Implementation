@@ -94,19 +94,20 @@ public class Server {
                     Game g = games.findGame(jp.gameID);
                     if (g == null) {
                         invalidGameIDMsgSend(session, gb);
-                    }
-                    if (jp.playerColor == ChessGame.TeamColor.WHITE && g.getWhiteUsername() == null) {
-                        DatabaseNotUpdatedProperlyErrorSend(session, gb);
-                    } else if (jp.playerColor == ChessGame.TeamColor.BLACK && g.getBlackUsername() == null) {
-                        DatabaseNotUpdatedProperlyErrorSend(session, gb);
-                    } else if (jp.playerColor == ChessGame.TeamColor.WHITE && !g.getWhiteUsername().equals(tokens.findUsernameFromToken(jp.getAuthString()))) {
-                        PlayerSlotTakenMessageSend(session, gb);
-                    } else if (jp.playerColor == ChessGame.TeamColor.BLACK && !g.getBlackUsername().equals(tokens.findUsernameFromToken(jp.getAuthString()))) {
-                        PlayerSlotTakenMessageSend(session, gb);
                     } else {
-                        gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
-                        loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
-                        session.getRemote().sendString(gb.create().toJson(lg));
+                        if (jp.playerColor == ChessGame.TeamColor.WHITE && g.getWhiteUsername() == null) {
+                            DatabaseNotUpdatedProperlyErrorSend(session, gb);
+                        } else if (jp.playerColor == ChessGame.TeamColor.BLACK && g.getBlackUsername() == null) {
+                            DatabaseNotUpdatedProperlyErrorSend(session, gb);
+                        } else if (jp.playerColor == ChessGame.TeamColor.WHITE && !g.getWhiteUsername().equals(tokens.findUsernameFromToken(jp.getAuthString()))) {
+                            PlayerSlotTakenMessageSend(session, gb);
+                        } else if (jp.playerColor == ChessGame.TeamColor.BLACK && !g.getBlackUsername().equals(tokens.findUsernameFromToken(jp.getAuthString()))) {
+                            PlayerSlotTakenMessageSend(session, gb);
+                        } else {
+                            gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
+                            loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
+                            session.getRemote().sendString(gb.create().toJson(lg));
+                        }
                     }
                 } else {
                     invalidAuthTokenMessageSend(session, gb);
@@ -135,22 +136,47 @@ public class Server {
             }
             case MAKE_MOVE -> {
                 makeMove mm = (makeMove) sm;
-                if (tokens.findUsernameFromToken(mm.getAuthString()) != null) {
+                String un = tokens.findUsernameFromToken(mm.getAuthString());
+                if (un != null) { // valid token
                     Game g = games.findGame(mm.gameID);
-                    ChessPositionImp startpos = (ChessPositionImp) mm.move.getStartPosition();
-                    if (g.getGame().validMoves(startpos).contains(mm.move)) {
-                        g.getGame().makeMove(mm.move);
-                        gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
-                        games.updateData("game", mm.gameID, gb.create().toJson(g.getGame(), ChessGameImp.class));
-                        loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
-                        broadcast(gb.create().toJson(lg), mm.gameID, null);
-                        broadcast(gb.create().toJson(new notificationMessage("Player has made move" + mm.move.toString())), mm.gameID, mm.getAuthString());
+
+                    if (g != null) {
+                        if (!g.getWhiteUsername().equals(un) && !g.getBlackUsername().equals(un)) {
+                            errorMessage em = new errorMessage("You are either observing or not connected properly. Try again.");
+                            gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+                            session.getRemote().sendString(gb.create().toJson(em));
+                        } else {
+                            ChessPositionImp startpos = (ChessPositionImp) mm.move.getStartPosition();
+                            if (g.getGame().validMoves(startpos).contains(mm.move)) { // valid move checker.
+                                if ((g.getBlackUsername().equals(un) && g.getGame().getBoard().getPiece(startpos).getTeamColor() == ChessGame.TeamColor.WHITE) || (g.getWhiteUsername().equals(un) && g.getGame().getBoard().getPiece(startpos).getTeamColor() == ChessGame.TeamColor.BLACK)) {
+                                    errorMessage em = new errorMessage("don't make moves for your opponents. what the heck, man.");
+                                    gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+                                    session.getRemote().sendString(gb.create().toJson(em));
+                                } else {
+                                    try {
+                                        g.getGame().makeMove(mm.move);
+                                        gb.registerTypeAdapter(ChessGameImp.class, new BoardAdapter());
+                                        games.updateData("game", mm.gameID, gb.create().toJson(g.getGame(), ChessGameImp.class));
+                                        loadGameMessage lg = new loadGameMessage(gb.create().toJson(g.getGame(), ChessGameImp.class));
+                                        broadcast(gb.create().toJson(lg), mm.gameID, null);
+                                        broadcast(gb.create().toJson(new notificationMessage("Player has made move" + mm.move.toString())), mm.gameID, mm.getAuthString());
+                                    } catch (Exception e) {
+                                        errorMessage em = new errorMessage("invalid move");
+                                        gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+                                        session.getRemote().sendString(gb.create().toJson(em));
+                                    }
+                                }
+                            } else {
+                                errorMessage em = new errorMessage("invalid move");
+                                gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+                                session.getRemote().sendString(gb.create().toJson(em));
+                            }
+                        }
                     } else {
-                        errorMessage em = new errorMessage("invalid move");
+                        errorMessage em = new errorMessage("invalid game");
                         gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
                         session.getRemote().sendString(gb.create().toJson(em));
                     }
-
 
                 } else {
                     invalidAuthTokenMessageSend(session, gb);
@@ -159,22 +185,73 @@ public class Server {
             case LEAVE -> {
                 leave l = (leave) sm;
                 if (tokens.findUsernameFromToken(l.getAuthString()) != null) {
-                    //TODO: Notify all that need to be notified.
+                    Game game = games.findGame(l.gameID);
+                    if (game == null) {
+                        invalidGameIDMsgSend(session, gb);
+                    } else {
+                        gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+                        String un = tokens.findUsernameFromToken(l.getAuthString());
+                        if (un.equals(game.getBlackUsername())) {
+                            games.updateData("blackUsername", game.getGameID(), null);
+                            removeTokenFromSessions(l.getAuthString(), l.gameID);
+
+                        }
+                        if (un.equals(game.getWhiteUsername())) {
+                            games.updateData("whiteUsername", game.getGameID(), null);
+                            removeTokenFromSessions(l.getAuthString(), l.gameID);
+
+                        }
+                        //if player, open up slot.
+                        broadcast(gb.create().toJson(new notificationMessage("user " + un + " is leaving the lobby.")), l.gameID, l.getAuthString());
+                    }
                 } else {
                     invalidAuthTokenMessageSend(session, gb);
                 }
             }
             case RESIGN -> {
                 resign r = (resign) sm;
-                if (tokens.findUsernameFromToken(r.getAuthString()) != null) {
-                    //TODO: Notify all that need to be notified.
-                } else {
-                    invalidAuthTokenMessageSend(session, gb);
+                {
+                    if (tokens.findUsernameFromToken(r.getAuthString()) != null) {
+                        Game game = games.findGame(r.gameID);
+                        if (game == null) {
+                            invalidGameIDMsgSend(session, gb);
+                        } else {
+                            gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+                            String un = tokens.findUsernameFromToken(r.getAuthString());
+                            if (un.equals(game.getBlackUsername())) {
+                                games.removeGame(r.gameID);
+                                broadcast(gb.create().toJson(new notificationMessage("Player " + un + " has resigned.")), r.gameID, null);
+                                removeTokenFromSessions(r.getAuthString(), r.gameID);
+                            } else if (un.equals(game.getWhiteUsername())) {
+                                games.removeGame(r.gameID);
+                                broadcast(gb.create().toJson(new notificationMessage("Player " + un + " has resigned.")), r.gameID, null);
+                                removeTokenFromSessions(r.getAuthString(), r.gameID);
+                            } else {
+                                errorMessage em = new errorMessage("You are an observer. As painful as this game is to watch, please " +
+                                        "don't make decisions for the people playing.");
+                                gb.registerTypeAdapter(ServerMessage.class, new ServerMessageAdapter());
+                                session.getRemote().sendString(gb.create().toJson(em));
+                            }
+                        }
+                    } else {
+                        invalidAuthTokenMessageSend(session, gb);
+                    }
                 }
             }
         }
-        System.out.printf("Received: %s", message);
-        session.getRemote().sendString("WebSocket response: " + message);
+        //System.out.printf("Received: %s", message);
+        //session.getRemote().sendString("WebSocket response: " + message);
+    }
+
+    private void removeTokenFromSessions(String authString, int gameID) {
+        for (int i = 0; i < connections.size(); i++) {
+            if (connections.elementAt(i).gameID == gameID) {
+                if (connections.elementAt(i).authToken.equals(authString)) {
+                    connections.remove(i);
+                }
+            }
+
+        }
     }
 
     private void DatabaseNotUpdatedProperlyErrorSend(Session session, GsonBuilder gb) throws IOException {
