@@ -9,10 +9,11 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" scope="TEST" name="junit.jupiter" level="project" />
+    <orderEntry type="module" module-name="shared" />
     <orderEntry type="library" exported="" name="slf4j.simple" level="project" />
     <orderEntry type="library" exported="" name="sparkjava.spark.core" level="project" />
     <orderEntry type="library" exported="" name="google.code.gson" level="project" />
+    <orderEntry type="library" exported="" name="mysql.connector.java" level="project" />
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
@@ -23,7 +24,6 @@
         <jarDirectory url="file://$MODULE_DIR$/src/libs" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="library" exported="" name="mysql.connector.java" level="project" />
-    <orderEntry type="module" module-name="shared" />
+    <orderEntry type="library" exported="" scope="TEST" name="junit.jupiter" level="project" />
   </component>
 </module>

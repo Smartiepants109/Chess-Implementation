@@ -65,7 +65,7 @@ public class client extends Endpoint {
         }
     }
 
-    public static Session session;
+    public Session session;
 
     private static Map readResponseBody(HttpURLConnection http) throws IOException {
         Map responseBody;
@@ -293,14 +293,14 @@ public class client extends Endpoint {
             while (!(command.toLowerCase().equals("leave") || command.toLowerCase().equals("exit"))) {
                 switch (command.toLowerCase()) {
                     case "help":
-                        printHelp("help", "displays all valid commands");
-                        printHelp("redraw", "draws an updated version of the chess board on your screen");
+                        printHelp("help", " - displays all valid commands");
+                        printHelp("redraw", " - draws an updated version of the chess board on your screen");
                         if (player) {
-                            printHelp("make", "a move. Must be formatted like \"make A1:A3\", where A1 is" +
+                            printHelp("make", " - a move. Must be formatted like \"make A1:A3\", where A1 is" +
                                     " the starting position and A3 is the ending position. Letters are rows, numbers are columns." +
                                     "If the move would promote a pawn, we ask that you type that singly spaced afterward.");
-                            printHelp("resign", "give up on a match. We'll ask for confirmation, don't worry.");
-                            printHelp("highlight", "all legal moves. we'll show you what moves are legal at the moment.");
+                            printHelp("resign", " - give up on a match. We'll ask for confirmation, don't worry.");
+                            printHelp("highlight", " - all legal moves. we'll show you what moves are legal at the moment.");
                         }
                         break;
                     case "redraw":
@@ -315,14 +315,36 @@ public class client extends Endpoint {
                     case "make":
                         if (player) {
                             String move = userInput.next();
-                            int startX = move.toLowerCase().charAt(0) - 'a';
-                            int startY = move.toLowerCase().charAt(1) - '1';
-                            int endX = move.toLowerCase().charAt(3) - 'a';
-                            int endY = move.toLowerCase().charAt(4) - '1';
+                            int endX = 0;
+                            int startY = 0;
+                            int startX = 0;
+                            int endY = 0;
+                            ChessPiece.PieceType cppt = ChessPiece.PieceType.PAWN;
 
-                            ChessMoveImp cmi = new ChessMoveImp(new ChessPositionImp(startX + 1, startY + 1), new ChessPositionImp(endX + 1, endY + 1), ChessPiece.PieceType.valueOf(userInput.next().toUpperCase()));
+                            try {
+                                startY = move.toLowerCase().charAt(0) - 'a';
+                                startX = move.toLowerCase().charAt(1) - '1';
+                                endY = move.toLowerCase().charAt(3) - 'a';
+                                endX = move.toLowerCase().charAt(4) - '1';
+
+                                if (endY == 0 || endY == 7 && currentBoardState.getBoard().getPiece(new ChessPositionImp(startX, startY)).getPieceType() == ChessPiece.PieceType.PAWN) {
+                                    boolean a = true;
+                                    while (a) {
+                                        try {
+                                            println("\nPlease enter a piece to promote to.");
+                                            ChessPiece.PieceType.valueOf(userInput.next().toUpperCase());
+                                            a = false;
+                                        } catch (Exception ex) {
+
+                                        }
+                                    }
+                                }
+                            } catch (Exception ex) {
+                                println("Something went wrong with your string's format. Please keep it as accurate as possible.");
+                            }
+                            ChessMoveImp cmi = new ChessMoveImp(new ChessPositionImp(startX + 1, startY + 1), new ChessPositionImp(endX + 1, endY + 1), cppt);
                             makeMove mm = new makeMove(sessionInfo.getAuthToken(), id, cmi);
-                            ws.send(new Gson().toJson(mm, makeMove.class));
+                            ws.send(new Gson().toJson(mm));
                         } else {
                             printHelp("Please", "make sure that you are connected as a player before doing that.");
                         }
@@ -332,7 +354,7 @@ public class client extends Endpoint {
                             println("Are you sure you want to quit? Y/N");
                             if (userInput.next().toLowerCase().equals("y")) {
                                 resign res = new resign(sessionInfo.getAuthToken(), id);
-                                ws.send(new Gson().toJson(res, resign.class));
+                                ws.send(new Gson().toJson(res));
                             }
                         } else {
                             printHelp("Please", "make sure that you are connected as a player before doing that.");
@@ -343,7 +365,7 @@ public class client extends Endpoint {
                         String pos = userInput.next();
                         int x = pos.toLowerCase().charAt(0) - 'a';
                         int y = pos.toLowerCase().charAt(1) - '1';
-                        ChessPositionImp cpi = new ChessPositionImp(x + 1, y + 1);
+                        ChessPositionImp cpi = new ChessPositionImp(y + 1, x + 1);
                         Vector<ChessMove> validMoves = (Vector<ChessMove>) cgi.validMoves(cpi);
                         Vector<ChessPositionImp> validPos = new Vector<>();
                         for (int i = 0; i < validMoves.size(); i++) {
@@ -366,7 +388,7 @@ public class client extends Endpoint {
                 command = userInput.next();
             }
             leave lv = new leave(sessionInfo.getAuthToken(), id);
-            ws.send(new Gson().toJson(lv, lv.getClass()));
+            ws.send(new Gson().toJson(lv));
 
         } catch (IllegalStateException |
                  NoSuchElementException e) {
@@ -620,6 +642,7 @@ public class client extends Endpoint {
                 sb.append(piece.getPieceTypeAsString());
 
             } else {
+                sb.append(EscapeSequences.SET_BG_COLOR_GREEN);
                 sb.append(EscapeSequences.EMPTY);
             }
             boardColorWhite = !boardColorWhite;
@@ -746,7 +769,6 @@ public class client extends Endpoint {
         System.out.println();
     }
 
-    @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
 
     }
