@@ -39,6 +39,18 @@ public class ChessGameImp implements ChessGame {
         }
     }
 
+    public ChessGameImp(Map map2, boolean isFromWebskt) {
+        this.currentTurn = (((String) (map2.get("currentTurn"))).toUpperCase().equals("WHITE")) ? TeamColor.WHITE : TeamColor.BLACK;
+        this.board = new ChessBoardImp();
+        List ol = (List) map2.get("board");
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                int slkdf = ((Double) ol.get(((i * 8) + j))).intValue();
+                board.addPiece(new ChessPositionImp(i + 1, j + 1), ChessPieceImp.GetFromNum(slkdf));
+            }
+        }
+    }
+
     @Override
     public TeamColor getTeamTurn() {
         return currentTurn;

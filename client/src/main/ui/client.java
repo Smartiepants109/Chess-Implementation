@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import messages.*;
 import webSocketMessages.serverMessages.ServerMessage;
+import webSocketMessages.userCommands.UserGameCommand;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -48,7 +49,7 @@ public class client extends Endpoint {
         switch (sm.getServerMessageType()) {
             case LOAD_GAME:
                 loadGameMessage lgm = (loadGameMessage) sm;
-                currentBoardState = new ChessGameImp((Map) lgm);
+                currentBoardState = new ChessGameImp(new Gson().fromJson(lgm.game, Map.class), true);
                 if (!isPlayer || playerColor.toLowerCase().equals("white")) {
                     PrintBoardInGame(currentBoardState);
                 }
@@ -147,7 +148,7 @@ public class client extends Endpoint {
                             color = null;
                         }
                         checkRemainInput();
-                        joinFunct(sessionInfo, color, id);
+                        joinFunct(sessionInfo, color.toUpperCase(), id);
                         break;
                     case "observe":
                         int id2 = userInput.nextInt();
@@ -284,10 +285,20 @@ public class client extends Endpoint {
 
     private static void connectedLoop(client ws, boolean player, AuthData sessionInfo, String color, int id, Scanner input, ChessGameImp cgi) {
         println(EscapeSequences.WHITE_QUEEN, "Welcome to CS 240 chess! Type \"help\" to get started!", EscapeSequences.BLACK_QUEEN);
+        GsonBuilder gb = new GsonBuilder();
+        gb.registerTypeAdapter(UserGameCommand.class, new UserMessageAdapter());
         isPlayer = player;
         playerColor = color;
-        String command = userInput.next();
         currentBoardState = cgi;
+        if (isPlayer) {
+            JoinPlayer jp = new JoinPlayer(sessionInfo.getAuthToken(), id, ChessGame.TeamColor.valueOf(color));
+            ws.send(gb.create().toJson(jp));
+        } else {
+            joinObserver jo = new joinObserver(sessionInfo.getAuthToken(), id);
+            ws.send(gb.create().toJson(jo));
+        }
+        String command = userInput.next();
+
         try {
             URI uri;
             while (!(command.toLowerCase().equals("leave") || command.toLowerCase().equals("exit"))) {
@@ -327,7 +338,7 @@ public class client extends Endpoint {
                                 endY = move.toLowerCase().charAt(3) - 'a';
                                 endX = move.toLowerCase().charAt(4) - '1';
 
-                                if (endY == 0 || endY == 7 && currentBoardState.getBoard().getPiece(new ChessPositionImp(startX, startY)).getPieceType() == ChessPiece.PieceType.PAWN) {
+                                if ((endX == 0 || endX == 7 )&& currentBoardState.getBoard().getPiece(new ChessPositionImp(startX, startY)).getPieceType() == ChessPiece.PieceType.PAWN) {
                                     boolean a = true;
                                     while (a) {
                                         try {
@@ -344,7 +355,8 @@ public class client extends Endpoint {
                             }
                             ChessMoveImp cmi = new ChessMoveImp(new ChessPositionImp(startX + 1, startY + 1), new ChessPositionImp(endX + 1, endY + 1), cppt);
                             makeMove mm = new makeMove(sessionInfo.getAuthToken(), id, cmi);
-                            ws.send(new Gson().toJson(mm));
+
+                            ws.send(new GsonBuilder().registerTypeAdapter(UserGameCommand.class, new UserMessageAdapter()).create().toJson(mm));
                         } else {
                             printHelp("Please", "make sure that you are connected as a player before doing that.");
                         }
@@ -354,7 +366,7 @@ public class client extends Endpoint {
                             println("Are you sure you want to quit? Y/N");
                             if (userInput.next().toLowerCase().equals("y")) {
                                 resign res = new resign(sessionInfo.getAuthToken(), id);
-                                ws.send(new Gson().toJson(res));
+                                ws.send(new GsonBuilder().registerTypeAdapter(UserGameCommand.class, new UserMessageAdapter()).create().toJson(res));
                             }
                         } else {
                             printHelp("Please", "make sure that you are connected as a player before doing that.");
@@ -388,7 +400,7 @@ public class client extends Endpoint {
                 command = userInput.next();
             }
             leave lv = new leave(sessionInfo.getAuthToken(), id);
-            ws.send(new Gson().toJson(lv));
+            ws.send(new GsonBuilder().registerTypeAdapter(UserGameCommand.class, new UserMessageAdapter()).create().toJson(lv));
 
         } catch (IllegalStateException |
                  NoSuchElementException e) {

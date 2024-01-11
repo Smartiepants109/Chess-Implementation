@@ -57,8 +57,7 @@ public class UserMessageAdapter extends TypeAdapter<UserGameCommand> {
                 jw.value(mm.move.getEndPosition().getColumn());
                 jw.endObject();
                 jw.endObject();
-                jw.name("promotion");
-                jw.value(mm.move.getPromotionPiece().toString());
+
 
                 jw.endObject();
                 break;
@@ -87,6 +86,8 @@ public class UserMessageAdapter extends TypeAdapter<UserGameCommand> {
         UserGameCommand output = null;
         jsonReader.beginObject();
         String auth = null;
+        ChessGame.TeamColor teamColor = null;
+        ChessMoveImp move = null;
         int gameID = -1;
         UserGameCommand.CommandType ct = null;
         String name = null;
@@ -108,81 +109,66 @@ public class UserMessageAdapter extends TypeAdapter<UserGameCommand> {
                 ct = UserGameCommand.CommandType.valueOf(jsonReader.nextString());
 
             }
-            if (ct != null) {
-                switch (ct) {
-                    case JOIN_PLAYER -> {
-                        if (name.equals("playerColor")) {
-                            if (jsonReader.nextString().equals("WHITE")) {
-                                output = new JoinPlayer(auth, gameID, ChessGame.TeamColor.WHITE);
-                                jsonReader.endObject();
-                                return output;
-                            } else {
-                                output = new JoinPlayer(auth, gameID, ChessGame.TeamColor.BLACK);
-                                jsonReader.endObject();
-                                return output;
-                            }
-                        }
 
-                    }
-                    case JOIN_OBSERVER -> {
-                        if (gameID != -1 && auth != null) {
-                            output = new joinObserver(auth, gameID);
-                            jsonReader.endObject();
-                            return output;
-                        }
-                    }
-                    case MAKE_MOVE -> {
-                        if (name.equals("move")) {
-                            jsonReader.beginObject();
-                            int bx, by, ex, ey;
-                            jsonReader.nextName();
-                            jsonReader.beginObject();
-                            jsonReader.nextName();
-                            bx = jsonReader.nextInt();
-                            jsonReader.nextName();
-                            by = jsonReader.nextInt();
-                            jsonReader.endObject();
-                            jsonReader.nextName();
-                            jsonReader.beginObject();
-                            jsonReader.nextName();
-                            ex = jsonReader.nextInt();
-                            jsonReader.nextName();
-                            ey = jsonReader.nextInt();
-                            jsonReader.endObject();
-                            jsonReader.endObject();
-                            ChessPiece.PieceType pt = null;
-                            if (jsonReader.peek().equals(JsonToken.NAME)) {
-                                jsonReader.nextName();
-                                pt = ChessPiece.PieceType.valueOf(jsonReader.nextString());
-                            }
-
-                            jsonReader.endObject();
-                            output = new makeMove(auth, gameID, new ChessMoveImp(new ChessPositionImp(bx + 1, by + 1),
-                                    new ChessPositionImp(ex + 1, ey + 1), pt));
-
-                            return output;
-                        }
-
-                    }
-                    case LEAVE -> {
-                        if (gameID != -1 && auth != null) {
-                            output = new leave(auth, gameID);
-                            jsonReader.endObject();
-                            return output;
-                        }
-                    }
-                    case RESIGN -> {
-                        if (gameID != -1 && auth != null) {
-                            output = new resign(auth, gameID);
-                            jsonReader.endObject();
-                            return output;
-                        }
-                    }
+            if (name.equals("playerColor")) {
+                if (jsonReader.nextString().toUpperCase().equals("WHITE")) {
+                    teamColor = ChessGame.TeamColor.WHITE;
+                } else {
+                    teamColor = ChessGame.TeamColor.BLACK;
                 }
             }
 
+            if (name.equals("move")) {
+                jsonReader.beginObject();
+                int bx, by, ex, ey;
+                jsonReader.nextName();
+                jsonReader.beginObject();
+                jsonReader.nextName();
+                bx = jsonReader.nextInt();
+                jsonReader.nextName();
+                by = jsonReader.nextInt();
+                jsonReader.endObject();
+                jsonReader.nextName();
+                jsonReader.beginObject();
+                jsonReader.nextName();
+                ex = jsonReader.nextInt();
+                jsonReader.nextName();
+                ey = jsonReader.nextInt();
+                jsonReader.endObject();
+                if (jsonReader.peek().equals(JsonToken.NAME)) {
+                    jsonReader.nextName();
+                    if (jsonReader.peek().equals(JsonToken.STRING)) {
+                        jsonReader.nextString();
+                    }
+                }
+                jsonReader.endObject();
+                ChessPiece.PieceType pt = null;
+                move = new ChessMoveImp(new ChessPositionImp(bx + 1, by + 1),
+                        new ChessPositionImp(ex + 1, ey + 1), pt);
+
+
+            }
+
+            if (jsonReader.peek().equals(JsonToken.END_OBJECT))
+                jsonReader.endObject();
         }
-        jsonReader.endObject();
+        switch (ct) {
+            case JOIN_PLAYER -> {
+                output = new JoinPlayer(auth, gameID, teamColor);
+            }
+            case JOIN_OBSERVER -> {
+                output = new joinObserver(auth, gameID);
+            }
+            case MAKE_MOVE -> {
+                output = new makeMove(auth, gameID, move);
+            }
+            case LEAVE -> {
+                output = new leave(auth, gameID);
+            }
+            case RESIGN -> {
+                output = new resign(auth, gameID);
+            }
+        }
         return output;
     }
 }

@@ -40,11 +40,25 @@ public class ServerMessageAdapter extends TypeAdapter<ServerMessage> {
     public ServerMessage read(JsonReader jsonReader) throws IOException {
         jsonReader.beginObject();
         String name = null;
+        String contents = null;
         ServerMessage.ServerMessageType smt = null;
         while (jsonReader.hasNext()) {
             JsonToken token = jsonReader.peek();
             if (token.equals(JsonToken.NAME)) {
                 name = jsonReader.nextName();
+            }
+            if (name.equals("serverMessageType")) {
+                switch (jsonReader.nextString()) {
+                    case "LOAD_GAME":
+                        smt = ServerMessage.ServerMessageType.LOAD_GAME;
+                        break;
+                    case "NOTIFICATION":
+                        smt = ServerMessage.ServerMessageType.NOTIFICATION;
+                        break;
+                    case "ERROR":
+                        smt = ServerMessage.ServerMessageType.ERROR;
+                        break;
+                }
             }
             if (name.equals("ServerMessageType")) {
                 token = jsonReader.peek();
@@ -59,23 +73,33 @@ public class ServerMessageAdapter extends TypeAdapter<ServerMessage> {
                         smt = ServerMessage.ServerMessageType.NOTIFICATION;
                         break;
                 }
-            } else {
-                if (smt == null) {
-                    throw new IOException("bad");
-                } else {
-                    switch (smt) {
-                        case ERROR:
-                            return new errorMessage(jsonReader.nextString());
-                        case NOTIFICATION:
-                            return new notificationMessage(jsonReader.nextString());
-                        case LOAD_GAME:
-                            return new loadGameMessage(jsonReader.nextString());
-                    }
-                }
+            }
+            if (name.equals("game")) {
+                contents = jsonReader.nextString();
+            }
+            if (name.equals("message")) {
+                contents = jsonReader.nextString();
+            }
+            if (name.equals("errorMessage")) {
+                contents = jsonReader.nextString();
+            }
+            if (jsonReader.peek().equals(JsonToken.END_OBJECT)) {
+                jsonReader.endObject();
             }
         }
-        jsonReader.endObject();
-        return new errorMessage("A loop in ServerMessageAdapter was exited. This means that the gson " +
-                "parsed here didn't have all the information it should have. Check the class.");
+        switch (smt) {
+            case LOAD_GAME -> {
+                return new loadGameMessage(contents);
+            }
+            case ERROR -> {
+                return new errorMessage(contents);
+            }
+            case NOTIFICATION -> {
+                return new notificationMessage(contents);
+            }
+            default -> {
+                return new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+            }
+        }
     }
 }
